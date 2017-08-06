@@ -20,6 +20,7 @@ More information at [Sling Block Market](http://www.slingmarket.net) Visit our A
 <tr><td>Difficulty Retargeting</td><td>Every Block</td></tr>
 <tr><td>Initial Supply (PoW Phase)</td><td>1,700,500 XSLG</td></tr>
 <tr><td>Max Coin Supply (PoS Phase)</td><td>Infinite</td></tr>
+<tr><td>Masternode Collateral</td><td>7331</td></tr>
 </table>
 
 ### Reward Distribution
