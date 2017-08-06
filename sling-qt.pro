@@ -275,7 +275,6 @@ HEADERS += \
     src/checkpoints.h \
     src/checkqueue.h \
     src/clientversion.h \
-    src/coincontrol.h \
     src/coinmix-relay.h \
     src/coinmix.h \
     src/coins.h \
@@ -283,9 +282,7 @@ HEADERS += \
     src/compressor.h \
     src/core_io.h \
     src/core_memusage.h \
-    src/crypter.h \
     src/cuckoocache.h \
-    src/db.h \
     src/dbwrapper.h \
     src/eccryptoverify.h \
     src/ecwrapper.h \
@@ -352,8 +349,6 @@ HEADERS += \
     src/validationinterface.h \
     src/version.h \
     src/versionbits.h \
-    src/wallet_ismine.h \
-    src/wallet.h \
     src/walletdb.h \
     src/warnings.h \
     src/qt/winshutdownmonitor.h \
@@ -416,19 +411,8 @@ HEADERS += \
     src/qt/addressbookpage.h \
     src/compat/sanity.h \
     src/consensus/merkle.h \
-    src/crypto/ctaes/ctaes.h \
-    src/policy/feerate.h \
-    src/policy/fees.h \
-    src/policy/policy.h \
-    src/policy/rbf.h \
     src/primitives/block.h \
     src/primitives/transaction.h \
-    src/rpc/blockchain.h \
-    src/rpc/client.h \
-    src/rpc/mining.h \
-    src/rpc/protocol.h \
-    src/rpc/register.h \
-    src/rpc/server.h \
     src/script/bitcoinconsensus.h \
     src/script/interpreter.h \
     src/script/ismine.h \
@@ -439,8 +423,6 @@ HEADERS += \
     src/script/standard.h \
     src/wallet/walletdb.h \
     src/wallet/wallet.h \
-    src/wallet/rpcwallet.h \
-    src/wallet/feebumper.h \
     src/wallet/db.h \
     src/wallet/crypter.h \
     src/wallet/coincontrol.h \
@@ -478,8 +460,6 @@ SOURCES += \
     src/compressor.cpp \
     src/core_read.cpp \
     src/core_write.cpp \
-    src/crypter.cpp \
-    src/db.cpp \
     src/dbwrapper.cpp \
     src/eccryptoverify.cpp \
     src/ecwrapper.cpp \
@@ -544,10 +524,7 @@ SOURCES += \
     src/utiltime.cpp \
     src/validation.cpp \
     src/validationinterface.cpp \
-    src/versionbits.cpp \
-    src/wallet_ismine.cpp \
-    src/wallet.cpp \
-    src/walletdb.cpp \
+    src/versionbits.cpp \\
     src/warnings.cpp \
     src/qt/addressbookpage.cpp \
     src/qt/addresstablemodel.cpp \
@@ -603,14 +580,6 @@ SOURCES += \
     src/policy/rbf.cpp \
     src/primitives/block.cpp \
     src/primitives/transaction.cpp \
-    src/rpc/blockchain.cpp \
-    src/rpc/client.cpp \
-    src/rpc/mining.cpp \
-    src/rpc/misc.cpp \
-    src/rpc/net.cpp \
-    src/rpc/protocol.cpp \
-    src/rpc/rawtransaction.cpp \
-    src/rpc/server.cpp \
     src/script/bitcoinconsensus.cpp \
     src/script/interpreter.cpp \
     src/script/ismine.cpp \
@@ -621,9 +590,6 @@ SOURCES += \
     src/script/standard.cpp \
     src/wallet/walletdb.cpp \
     src/wallet/wallet.cpp \
-    src/wallet/rpcwallet.cpp \
-    src/wallet/rpcdump.cpp \
-    src/wallet/feebumper.cpp \
     src/wallet/db.cpp \
     src/wallet/crypter.cpp \
     src/zmq/zmqabstractnotifier.cpp \

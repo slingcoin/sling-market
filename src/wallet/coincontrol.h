@@ -1,36 +1,28 @@
-// Copyright (c) 2011-2016 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+// Copyright (c) 2011-2013 The Bitcoin developers
+// Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_WALLET_COINCONTROL_H
-#define BITCOIN_WALLET_COINCONTROL_H
+#ifndef BITCOIN_COINCONTROL_H
+#define BITCOIN_COINCONTROL_H
 
-#include "policy/feerate.h"
-#include "policy/fees.h"
 #include "primitives/transaction.h"
-#include "wallet/wallet.h"
-
-#include <boost/optional.hpp>
+#include "script/standard.h"
 
 /** Coin Control Features. */
 class CCoinControl
 {
 public:
     CTxDestination destChange;
+    bool useCoinMix;
+    bool useFastSend;
+    bool fSplitBlock;
+    int nSplitBlock;
     //! If false, allows unselected inputs, but requires all selected inputs be used
     bool fAllowOtherInputs;
     //! Includes watch only addresses which match the ISMINE_WATCH_SOLVABLE criteria
     bool fAllowWatchOnly;
-    //! Override automatic min/max checks on fee, m_feerate must be set if true
-    bool fOverrideFeeRate;
-    //! Override the default payTxFee if set
-    boost::optional<CFeeRate> m_feerate;
-    //! Override the default confirmation target if set
-    boost::optional<unsigned int> m_confirm_target;
-    //! Signal BIP-125 replace by fee.
-    bool signalRbf;
-    //! Fee estimation mode to control arguments to estimateSmartFee
-    FeeEstimateMode m_fee_mode;
+    //! Minimum absolute fee (not per kilobyte)
+    CAmount nMinimumTotalFee;
 
     CCoinControl()
     {
@@ -40,14 +32,14 @@ public:
     void SetNull()
     {
         destChange = CNoDestination();
+        setSelected.clear();
+        useFastSend = false;
+        useCoinMix = true;
         fAllowOtherInputs = false;
         fAllowWatchOnly = false;
-        setSelected.clear();
-        m_feerate.reset();
-        fOverrideFeeRate = false;
-        m_confirm_target.reset();
-        signalRbf = fWalletRbf;
-        m_fee_mode = FeeEstimateMode::UNSET;
+        nMinimumTotalFee = 0;
+        fSplitBlock = false;
+        nSplitBlock = 1;
     }
 
     bool HasSelected() const
@@ -55,9 +47,10 @@ public:
         return (setSelected.size() > 0);
     }
 
-    bool IsSelected(const COutPoint& output) const
+    bool IsSelected(const uint256& hash, unsigned int n) const
     {
-        return (setSelected.count(output) > 0);
+        COutPoint outpt(hash, n);
+        return (setSelected.count(outpt) > 0);
     }
 
     void Select(const COutPoint& output)
@@ -75,7 +68,7 @@ public:
         setSelected.clear();
     }
 
-    void ListSelected(std::vector<COutPoint>& vOutpoints) const
+    void ListSelected(std::vector<COutPoint>& vOutpoints)
     {
         vOutpoints.assign(setSelected.begin(), setSelected.end());
     }
@@ -84,4 +77,4 @@ private:
     std::set<COutPoint> setSelected;
 };
 
-#endif // BITCOIN_WALLET_COINCONTROL_H
+#endif // BITCOIN_COINCONTROL_H

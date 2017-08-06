@@ -90,7 +90,6 @@ BITCOIN_CORE_H = \
   checkpoints.h \
   checkqueue.h \
   clientversion.h \
-  coincontrol.h \
   coins.h \
   compat.h \
   compat/sanity.h \
@@ -102,10 +101,8 @@ BITCOIN_CORE_H = \
   primitives/block.h \
   primitives/transaction.h \
   core_io.h \
-  crypter.h \
   coinmix.h \
   coinmix-relay.h \
-  db.h \
   eccryptoverify.h \
   ecwrapper.h \
   genesis.h \
@@ -161,9 +158,12 @@ BITCOIN_CORE_H = \
   utiltime.h \
   validationinterface.h \
   version.h \
-  wallet.h \
-  wallet_ismine.h \
-  walletdb.h \
+  wallet\coincontrol.h \
+  wallet\crypter.h \
+  wallet\db.h \
+  wallet\wallet.h \
+  wallet\walletdb.h \
+  wallet\wallet_ismine.h \
   zmq/zmqabstractnotifier.h \
   zmq/zmqconfig.h \
   zmq/zmqnotificationinterface.h \
@@ -238,11 +238,11 @@ libbitcoin_wallet_a_CPPFLAGS = $(BITCOIN_INCLUDES)
 libbitcoin_wallet_a_SOURCES = \
   activemasternode.cpp \
   bip38.cpp \
+  wallet\crypter.cpp \
   coinmix.cpp \
   coinmix-relay.cpp \
-  db.cpp \
-  crypter.cpp \
   fastsend.cpp \
+  kernel.cpp \
   masternode.cpp \
   masternode-budget.cpp \
   masternode-payments.cpp \
@@ -251,10 +251,10 @@ libbitcoin_wallet_a_SOURCES = \
   masternodeman.cpp \
   rpcdump.cpp \
   rpcwallet.cpp \
-  kernel.cpp \
-  wallet.cpp \
-  wallet_ismine.cpp \
-  walletdb.cpp \
+  wallet\db.cpp \
+  wallet\wallet.cpp \
+  wallet\wallet_ismine.cpp \
+  wallet\walletdb.cpp \
   $(BITCOIN_CORE_H)
 
 # crypto primitives library
@@ -470,14 +470,14 @@ endif
 CLEANFILES = leveldb/libleveldb.a leveldb/libmemenv.a
 CLEANFILES += *.gcda *.gcno
 CLEANFILES += compat/*.gcda compat/*.gcno
+CLEANFILES += consensus/*.gcda consensus/*.gcno
 CLEANFILES += crypto/*.gcda crypto/*.gcno
+CLEANFILES += policy/*.gcda policy/*.gcno
 CLEANFILES += primitives/*.gcda primitives/*.gcno
 CLEANFILES += script/*.gcda script/*.gcno
 CLEANFILES += univalue/*.gcda univalue/*.gcno
-CLEANFILES += zmq/*.gcda zmq/*.gcno
-CLEANFILES += consensus/*.gcda consensus/*.gcno
-CLEANFILES += policy/*.gcda policy/*.gcno
 CLEANFILES += wallet/*.gcda wallet/*.gcno
+CLEANFILES += zmq/*.gcda zmq/*.gcno
 
 DISTCLEANFILES = obj/build.h
 

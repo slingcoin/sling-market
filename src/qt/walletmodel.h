@@ -10,7 +10,7 @@
 
 #include "allocators.h" /* for SecureString */
 #include "fastsend.h"
-#include "wallet.h"
+#include "wallet/wallet.h"
 
 #include <map>
 #include <vector>

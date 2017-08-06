@@ -10,7 +10,7 @@
 #include "coinmix.h"
 #include "fastsend.h"
 #include "timedata.h"
-#include "wallet.h"
+#include "wallet/wallet.h"
 
 #include <stdint.h>
 

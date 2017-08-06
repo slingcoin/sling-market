@@ -18,7 +18,7 @@
 #include "coinmix.h"
 #include "primitives/transaction.h"
 #include "ui_interface.h"
-#include "wallet.h"
+#include "wallet/wallet.h"
 
 #ifdef WIN32
 #include <string.h>

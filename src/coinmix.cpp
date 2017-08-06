@@ -4,7 +4,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "coinmix.h"
-#include "coincontrol.h"
+
+#include "wallet/coincontrol.h"
 #include "init.h"
 #include "main.h"
 #include "masternodeman.h"
