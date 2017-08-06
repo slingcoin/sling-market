@@ -1,6 +1,6 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
-// Copyright (c) 2015-2017 The PIVX developers
+// Copyright (c) 2015-2017 The SLING developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -36,7 +36,7 @@ void SendMoney(const CTxDestination& address, CAmount nValue, CWalletTx& wtxNew,
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
 
-    // Parse Pivx address
+    // Parse Sling address
     CScript scriptPubKey = GetScriptForDestination(address);
 
     // Create and send the transaction
@@ -52,12 +52,12 @@ void SendMoney(const CTxDestination& address, CAmount nValue, CWalletTx& wtxNew,
         throw JSONRPCError(RPC_WALLET_ERROR, "Error: The transaction was rejected! This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
 }
 
-Value obfuscation(const Array& params, bool fHelp)
+Value coinmix(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() == 0)
         throw runtime_error(
-            "obfuscation <pivxaddress> <amount>\n"
-            "pivxaddress, reset, or auto (AutoDenominate)"
+            "coinmix <slingaddress> <amount>\n"
+            "slingaddress, reset, or auto (AutoDenominate)"
             "<amount> is a real and will be rounded to the next 0.1" +
             HelpRequiringPassphrase());
 
@@ -66,26 +66,26 @@ Value obfuscation(const Array& params, bool fHelp)
 
     if (params[0].get_str() == "auto") {
         if (fMasterNode)
-            return "ObfuScation is not supported from masternodes";
+            return "CoinMix is not supported from masternodes";
 
-        return "DoAutomaticDenominating " + (obfuScationPool.DoAutomaticDenominating() ? "successful" : ("failed: " + obfuScationPool.GetStatus()));
+        return "DoAutomaticDenominating " + (CoinMixPool.DoAutomaticDenominating() ? "successful" : ("failed: " + CoinMixPool.GetStatus()));
     }
 
     if (params[0].get_str() == "reset") {
-        obfuScationPool.Reset();
-        return "successfully reset obfuscation";
+        CoinMixPool.Reset();
+        return "successfully reset coinmix";
     }
 
     if (params.size() != 2)
         throw runtime_error(
-            "obfuscation <pivxaddress> <amount>\n"
-            "pivxaddress, denominate, or auto (AutoDenominate)"
+            "coinmix <slingaddress> <amount>\n"
+            "slingaddress, denominate, or auto (AutoDenominate)"
             "<amount> is a real and will be rounded to the next 0.1" +
             HelpRequiringPassphrase());
 
     CBitcoinAddress address(params[0].get_str());
     if (!address.IsValid())
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Pivx address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Sling address");
 
     // Amount
     CAmount nAmount = AmountFromValue(params[1]);
@@ -110,9 +110,9 @@ Value getpoolinfo(const Array& params, bool fHelp)
 
     Object obj;
     obj.push_back(Pair("current_masternode", mnodeman.GetCurrentMasterNode()->addr.ToString()));
-    obj.push_back(Pair("state", obfuScationPool.GetState()));
-    obj.push_back(Pair("entries", obfuScationPool.GetEntriesCount()));
-    obj.push_back(Pair("entries_accepted", obfuScationPool.GetCountEntriesAccepted()));
+    obj.push_back(Pair("state", CoinMixPool.GetState()));
+    obj.push_back(Pair("entries", CoinMixPool.GetEntriesCount()));
+    obj.push_back(Pair("entries_accepted", CoinMixPool.GetCountEntriesAccepted()));
     return obj;
 }
 
@@ -141,7 +141,7 @@ Value masternode(const Array& params, bool fHelp)
             "  genkey       - Generate new masternodeprivkey\n"
             "  enforce      - Enforce masternode payments\n"
             "  outputs      - Print masternode compatible outputs\n"
-            "  start        - Start masternode configured in pivx.conf\n"
+            "  start        - Start masternode configured in sling.conf\n"
             "  start-alias  - Start single masternode by assigned alias configured in masternode.conf\n"
             "  start-<mode> - Start masternodes configured in masternode.conf (<mode>: 'all', 'missing', 'disabled')\n"
             "  status       - Print masternode status information\n"
@@ -568,7 +568,7 @@ Value masternodelist(const Array& params, bool fHelp)
             "    \"txhash\": \"hash\",    (string) Collateral transaction hash\n"
             "    \"outidx\": n,         (numeric) Collateral transaction output index\n"
             "    \"status\": s,         (string) Status (ENABLED/EXPIRED/REMOVE/etc)\n"
-            "    \"addr\": \"addr\",      (string) Masternode PIVX address\n"
+            "    \"addr\": \"addr\",      (string) Masternode Sling address\n"
             "    \"version\": v,        (numeric) Masternode protocol version\n"
             "    \"lastseen\": ttt,     (numeric) The time in seconds since epoch (Jan 1 1970 GMT) of the last seen\n"
             "    \"activetime\": ttt,   (numeric) The time in seconds since epoch (Jan 1 1970 GMT) masternode has been active\n"

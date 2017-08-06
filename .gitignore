@@ -7,12 +7,12 @@ reset-files.bash
 *.tar.gz
 
 *.exe
-src/pivx
-src/pivxd
-src/pivx-cli
-src/pivx-tx
-src/test/test_pivx
-src/qt/test/test_pivx-qt
+src/sling
+src/slingd
+src/sling-cli
+src/sling-tx
+src/test/test_sling
+src/qt/test/test_sling-qt
 
 # autoreconf
 Makefile.in
@@ -35,8 +35,8 @@ config.log
 config.status
 configure
 libtool
-src/config/pivx-config.h
-src/config/pivx-config.h.in
+src/config/sling-config.h
+src/config/sling-config.h.in
 src/config/stamp-h1
 share/setup.nsi
 share/qt/Info.plist
@@ -62,7 +62,7 @@ src/qt/test/moc*.cpp
 *.o
 *.o-*
 *.patch
-.pivx
+.sling
 *.a
 *.pb.cc
 *.pb.h
@@ -81,12 +81,12 @@ src/qt/test/moc*.cpp
 # Compilation and Qt preprocessor part
 *.qm
 Makefile
-pivx-qt
-PIVX-Qt.app
+sling-qt
+Sling-Qt.app
 
 # Unit-tests
 Makefile.test
-pivx-qt_test
+sling-qt_test
 src/test/buildenv.py
 
 # Resources cpp
@@ -102,7 +102,7 @@ build
 #lcov
 *.gcno
 /*.info
-test_pivx.coverage/
+test_sling.coverage/
 total.coverage/
 coverage_percent.txt
 
@@ -121,3 +121,5 @@ qa/pull-tester/test.*/*
 .project
 /doc/doxygen/
 /nbproject/
+
+.tx/*.*

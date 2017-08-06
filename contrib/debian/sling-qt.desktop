@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Sling
+Comment=Sling P2P Cryptocurrency and Market
+Comment[fr]=Sling, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Sling, eşten eşe kriptografik sanal para birimi
+Exec=sling-qt %u
+Terminal=false
+Type=Application
+Icon=sling128
+MimeType=x-scheme-handler/sling;
+Categories=Office;Finance;
