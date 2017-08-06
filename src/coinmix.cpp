@@ -37,7 +37,7 @@ map<uint256, CCoinMixBroadcastTx> mapCoinMixBroadcastTxes;
 // Keep track of the active Masternode
 CActiveMasternode activeMasternode;
 
-/* *** BEGIN COINMIX MAGIC - PIV **********
+/* *** BEGIN COINMIX MAGIC - SLING **********
     Copyright (c) 2014-2015, Dash Developers
         eduffield - evan@dashpay.io
         udjinm6   - udjinm6@dashpay.io
@@ -779,7 +779,7 @@ void CCoinMixPool::ChargeRandomFees()
                 with using it to stop abuse. Otherwise it could serve as an attack vector and
                 allow endless transaction that would bloat Sling and make it unusable. To
                 stop these kinds of attacks 1 in 10 successful transactions are charged. This
-                adds up to a cost of 0.001 PIV per transaction on average.
+                adds up to a cost of 0.001 SLING per transaction on average.
             */
             if (r <= 10) {
                 LogPrintf("CCoinMixPool::ChargeRandomFees -- charging random fees. %u\n", i);
@@ -1915,10 +1915,10 @@ void CCoinMixPool::GetDenominationsToString(int nDenom, std::string& strDenom)
 {
     // Function returns as follows:
     //
-    // bit 0 - 100PIV+1 ( bit on if present )
-    // bit 1 - 10PIV+1
-    // bit 2 - 1PIV+1
-    // bit 3 - .1PIV+1
+    // bit 0 - 100SLING+1 ( bit on if present )
+    // bit 1 - 10SLING+1
+    // bit 2 - 1SLING+1
+    // bit 3 - .1SLING+1
     // bit 3 - non-denom
 
 
@@ -1988,10 +1988,10 @@ int CCoinMixPool::GetDenominations(const std::vector<CTxOut>& vout, bool fSingle
 
     // Function returns as follows:
     //
-    // bit 0 - 100PIV+1 ( bit on if present )
-    // bit 1 - 10PIV+1
-    // bit 2 - 1PIV+1
-    // bit 3 - .1PIV+1
+    // bit 0 - 100SLING+1 ( bit on if present )
+    // bit 1 - 10SLING+1
+    // bit 2 - 1SLING+1
+    // bit 3 - .1SLING+1
 
     return denom;
 }
