@@ -1,7 +1,7 @@
 Sling Market Core integration/staging repository
 =====================================
 
-[![Build Status](https://travis-ci.org/slingcoin/sling2.svg?branch=master)](https://travis-ci.org/slingcoin/sling2) [![GitHub version](https://badge.fury.io/gh/slingcoin/sling2.svg)](https://badge.fury.io/gh/slingcoin/sling2)
+[![Build Status](https://travis-ci.org/slingcoin/sling2.svg?branch=master)](https://travis-ci.org/slingcoin/sling-market) [![GitHub version](https://badge.fury.io/gh/slingcoin/sling-market.svg)](https://badge.fury.io/gh/slingcoin/sling-market)
 
 Sling Blockchain Market is a cutting edge cryptocurrency, with many features not available in most other cryptocurrencies.
 - Built in blockchain market
@@ -20,6 +20,9 @@ More information at [Sling Block Market](http://www.slingmarket.net) Visit our A
 <tr><td>Difficulty Retargeting</td><td>Every Block</td></tr>
 <tr><td>Initial Supply (PoW Phase)</td><td>1,700,500 XSLG</td></tr>
 <tr><td>Max Coin Supply (PoS Phase)</td><td>Infinite</td></tr>
+<tr><td>PoS Reward</td><td>1.50</td></tr>
+<tr><td>PoW Reward</td><td>3.35</td></tr>
+<tr><td>Masternode Reward</td><td>2.50</td></tr>
 <tr><td>Masternode Collateral</td><td>7331</td></tr>
 </table>
 
