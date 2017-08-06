@@ -148,8 +148,8 @@
         <translation>Czy na pewno chcesz zakodować portfel?</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR PIV&lt;/b&gt;!</source>
-        <translation>Ostrzeżenie: Jeżeli zakodujesz portfel i stracisz do niego hasło , UTRACISZ WSZYSTKIE PIV!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR SLING&lt;/b&gt;!</source>
+        <translation>Ostrzeżenie: Jeżeli zakodujesz portfel i stracisz do niego hasło , UTRACISZ WSZYSTKIE SLING!</translation>
     </message>
     <message>
         <source>Wallet encrypted</source>
@@ -1369,7 +1369,7 @@ https://www.transifex.com/slingcoin/slingcoin-translations </translation>
         <translation>Status:</translation>
     </message>
     <message>
-        <source>0 PIV / 0 Rounds</source>
+        <source>0 SLING / 0 Rounds</source>
         <translation>0 OIVX / 0 Rund</translation>
     </message>
     <message>
