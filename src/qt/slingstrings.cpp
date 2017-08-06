@@ -76,10 +76,10 @@ QT_TRANSLATE_NOOP("sling-core", ""
 "Execute command when the best block changes (%s in cmd is replaced by block "
 "hash)"),
 QT_TRANSLATE_NOOP("sling-core", ""
-"Fees (in PIV/Kb) smaller than this are considered zero fee for relaying "
+"Fees (in SLING/Kb) smaller than this are considered zero fee for relaying "
 "(default: %s)"),
 QT_TRANSLATE_NOOP("sling-core", ""
-"Fees (in PIV/Kb) smaller than this are considered zero fee for transaction "
+"Fees (in SLING/Kb) smaller than this are considered zero fee for transaction "
 "creation (default: %s)"),
 QT_TRANSLATE_NOOP("sling-core", ""
 "Flush database activity from memory pool to disk log every <n> megabytes "
@@ -171,10 +171,10 @@ QT_TRANSLATE_NOOP("sling-core", ""
 "Unable to locate enough CoinMix denominated funds for this transaction."),
 QT_TRANSLATE_NOOP("sling-core", ""
 "Unable to locate enough CoinMix non-denominated funds for this "
-"transaction that are not equal 10000 PIV."),
+"transaction that are not equal 7331 SLING."),
 QT_TRANSLATE_NOOP("sling-core", ""
-"Unable to locate enough funds for this transaction that are not equal 10000 "
-"PIV."),
+"Unable to locate enough funds for this transaction that are not equal 7331 "
+"SLING."),
 QT_TRANSLATE_NOOP("sling-core", ""
 "Use separate SOCKS5 proxy to reach peers via Tor hidden services (default: "
 "%s)"),
@@ -280,7 +280,7 @@ QT_TRANSLATE_NOOP("sling-core", "Error: Wallet locked, unable to create transact
 QT_TRANSLATE_NOOP("sling-core", "Error: You already have pending entries in the CoinMix pool"),
 QT_TRANSLATE_NOOP("sling-core", "Failed to listen on any port. Use -listen=0 if you want this."),
 QT_TRANSLATE_NOOP("sling-core", "Failed to read block"),
-QT_TRANSLATE_NOOP("sling-core", "Fee (in PIV/kB) to add to transactions you send (default: %s)"),
+QT_TRANSLATE_NOOP("sling-core", "Fee (in SLING/kB) to add to transactions you send (default: %s)"),
 QT_TRANSLATE_NOOP("sling-core", "Finalizing transaction."),
 QT_TRANSLATE_NOOP("sling-core", "Force safe mode (default: %u)"),
 QT_TRANSLATE_NOOP("sling-core", "Found enough users, signing ( waiting %s )"),
@@ -311,7 +311,7 @@ QT_TRANSLATE_NOOP("sling-core", "Invalid netmask specified in -whitelist: '%s'")
 QT_TRANSLATE_NOOP("sling-core", "Invalid port detected in masternode.conf"),
 QT_TRANSLATE_NOOP("sling-core", "Invalid private key."),
 QT_TRANSLATE_NOOP("sling-core", "Invalid script detected."),
-QT_TRANSLATE_NOOP("sling-core", "Keep N PIV anonymized (default: %u)"),
+QT_TRANSLATE_NOOP("sling-core", "Keep N SLING anonymized (default: %u)"),
 QT_TRANSLATE_NOOP("sling-core", "Keep at most <n> unconnectable transactions in memory (default: %u)"),
 QT_TRANSLATE_NOOP("sling-core", "Last CoinMix was too recent."),
 QT_TRANSLATE_NOOP("sling-core", "Last successful CoinMix action was too recent."),
