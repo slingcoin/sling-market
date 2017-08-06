@@ -1,10 +1,10 @@
 Sample configuration files for:
 
-SystemD: pivxd.service
-Upstart: pivxd.conf
-OpenRC:  pivxd.openrc
-         pivxd.openrcconf
-CentOS:  pivxd.init
+SystemD: slingd.service
+Upstart: slingd.conf
+OpenRC:  slingd.openrc
+         slingd.openrcconf
+CentOS:  slingd.init
 
 have been made available to assist packagers in creating node packages here.
 

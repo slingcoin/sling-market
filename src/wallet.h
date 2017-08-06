@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2017 The PIVX developers
+// Copyright (c) 2015-2017 The SLING developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -162,8 +162,8 @@ private:
 public:
     bool MintableCoins();
     bool SelectStakeCoins(std::set<std::pair<const CWalletTx*, unsigned int> >& setCoins, int64_t nTargetAmount) const;
-    bool SelectCoinsDark(int64_t nValueMin, int64_t nValueMax, std::vector<CTxIn>& setCoinsRet, int64_t& nValueRet, int nObfuscationRoundsMin, int nObfuscationRoundsMax) const;
-    bool SelectCoinsByDenominations(int nDenom, int64_t nValueMin, int64_t nValueMax, std::vector<CTxIn>& vCoinsRet, std::vector<COutput>& vCoinsRet2, int64_t& nValueRet, int nObfuscationRoundsMin, int nObfuscationRoundsMax);
+    bool SelectCoinsDark(int64_t nValueMin, int64_t nValueMax, std::vector<CTxIn>& setCoinsRet, int64_t& nValueRet, int nCoinMixRoundsMin, int nCoinMixRoundsMax) const;
+    bool SelectCoinsByDenominations(int nDenom, int64_t nValueMin, int64_t nValueMax, std::vector<CTxIn>& vCoinsRet, std::vector<COutput>& vCoinsRet2, int64_t& nValueRet, int nCoinMixRoundsMin, int nCoinMixRoundsMax);
     bool SelectCoinsDarkDenominated(int64_t nTargetValue, std::vector<CTxIn>& setCoinsRet, int64_t& nValueRet) const;
     bool HasCollateralInputs(bool fOnlyConfirmed = true) const;
     bool IsCollateralAmount(int64_t nInputAmount) const;
@@ -405,8 +405,8 @@ public:
         CAmount nFeePay = 0);
     bool CreateTransaction(CScript scriptPubKey, const CAmount& nValue, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, std::string& strFailReason, const CCoinControl* coinControl = NULL, AvailableCoinsType coin_type = ALL_COINS, bool useIX = false, CAmount nFeePay = 0);
     bool CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, std::string strCommand = "tx");
-    std::string PrepareObfuscationDenominate(int minRounds, int maxRounds);
-    int GenerateObfuscationOutputs(int nTotalValue, std::vector<CTxOut>& vout);
+    std::string PrepareCoinMixDenominate(int minRounds, int maxRounds);
+    int GenerateCoinMixOutputs(int nTotalValue, std::vector<CTxOut>& vout);
     bool CreateCollateralTransaction(CMutableTransaction& txCollateral, std::string& strReason);
     bool ConvertList(std::vector<CTxIn> vCoins, std::vector<int64_t>& vecAmounts);
     bool CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int64_t nSearchInterval, CMutableTransaction& txNew, unsigned int& nTxNewTime);
@@ -433,10 +433,10 @@ public:
     bool GetBudgetSystemCollateralTX(CTransaction& tx, uint256 hash, bool useIX);
     bool GetBudgetSystemCollateralTX(CWalletTx& tx, uint256 hash, bool useIX);
 
-    // get the Obfuscation chain depth for a given input
-    int GetRealInputObfuscationRounds(CTxIn in, int rounds) const;
+    // get the CoinMix chain depth for a given input
+    int GetRealInputCoinMixRounds(CTxIn in, int rounds) const;
     // respect current settings
-    int GetInputObfuscationRounds(CTxIn in) const;
+    int GetInputCoinMixRounds(CTxIn in) const;
 
     bool IsDenominated(const CTxIn& txin) const;
     bool IsDenominated(const CTransaction& tx) const;
@@ -981,8 +981,8 @@ public:
             if (pwallet->IsSpent(hashTx, i) || pwallet->IsLockedCoin(hashTx, i)) continue;
             if (fMasterNode && vout[i].nValue == 10000 * COIN) continue; // do not count MN-like outputs
 
-            const int rounds = pwallet->GetInputObfuscationRounds(vin);
-            if (rounds >= -2 && rounds < nObfuscationRounds) {
+            const int rounds = pwallet->GetInputCoinMixRounds(vin);
+            if (rounds >= -2 && rounds < nCoinMixRounds) {
                 nCredit += pwallet->GetCredit(txout, ISMINE_SPENDABLE);
                 if (!MoneyRange(nCredit))
                     throw std::runtime_error("CWalletTx::GetAnonamizableCredit() : value out of range");
@@ -1014,8 +1014,8 @@ public:
 
             if (pwallet->IsSpent(hashTx, i) || !pwallet->IsDenominated(vin)) continue;
 
-            const int rounds = pwallet->GetInputObfuscationRounds(vin);
-            if (rounds >= nObfuscationRounds) {
+            const int rounds = pwallet->GetInputCoinMixRounds(vin);
+            if (rounds >= nCoinMixRounds) {
                 nCredit += pwallet->GetCredit(txout, ISMINE_SPENDABLE);
                 if (!MoneyRange(nCredit))
                     throw std::runtime_error("CWalletTx::GetAnonymizedCredit() : value out of range");
@@ -1188,10 +1188,10 @@ public:
         fSpendable = fSpendableIn;
     }
 
-    //Used with Obfuscation. Will return largest nondenom, then denominations, then very small inputs
+    //Used with CoinMix. Will return largest nondenom, then denominations, then very small inputs
     int Priority() const
     {
-        BOOST_FOREACH (int64_t d, obfuScationDenominations)
+        BOOST_FOREACH (int64_t d, CoinMixDenominations)
             if (tx->vout[i].nValue == d) return 10000;
         if (tx->vout[i].nValue < 1 * COIN) return 20000;
 

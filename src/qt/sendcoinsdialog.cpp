@@ -1,6 +1,6 @@
 // Copyright (c) 2011-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2017 The PIVX developers
+// Copyright (c) 2015-2017 The SLING developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -59,30 +59,30 @@ SendCoinsDialog::SendCoinsDialog(QWidget* parent) : QDialog(parent),
     connect(ui->splitBlockCheckBox, SIGNAL(stateChanged(int)), this, SLOT(splitBlockChecked(int)));
     connect(ui->splitBlockLineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(splitBlockLineEditChanged(const QString&)));
 
-    // PIVX specific
+    // Sling specific
     QSettings settings;
-    if (!settings.contains("bUseObfuScation"))
-        settings.setValue("bUseObfuScation", false);
-    if (!settings.contains("bUseSwiftTX"))
-        settings.setValue("bUseSwiftTX", false);
+    if (!settings.contains("bUseCoinMix"))
+        settings.setValue("bUseCoinMix", false);
+    if (!settings.contains("bUseFastSend"))
+        settings.setValue("bUseFastSend", false);
 
-    bool useObfuScation = settings.value("bUseObfuScation").toBool();
-    bool useSwiftTX = settings.value("bUseSwiftTX").toBool();
+    bool useCoinMix = settings.value("bUseCoinMix").toBool();
+    bool useFastSend = settings.value("bUseFastSend").toBool();
     if (fLiteMode) {
-        ui->checkUseObfuscation->setChecked(false);
-        ui->checkUseObfuscation->setVisible(false);
-        ui->checkSwiftTX->setVisible(false);
-        CoinControlDialog::coinControl->useObfuScation = false;
-        CoinControlDialog::coinControl->useSwiftTX = false;
+        ui->checkUseCoinMix->setChecked(false);
+        ui->checkUseCoinMix->setVisible(false);
+        ui->checkFastSend->setVisible(false);
+        CoinControlDialog::coinControl->useCoinMix = false;
+        CoinControlDialog::coinControl->useFastSend = false;
     } else {
-        ui->checkUseObfuscation->setChecked(useObfuScation);
-        ui->checkSwiftTX->setChecked(useSwiftTX);
-        CoinControlDialog::coinControl->useObfuScation = useObfuScation;
-        CoinControlDialog::coinControl->useSwiftTX = useSwiftTX;
+        ui->checkUseCoinMix->setChecked(useCoinMix);
+        ui->checkFastSend->setChecked(useFastSend);
+        CoinControlDialog::coinControl->useCoinMix = useCoinMix;
+        CoinControlDialog::coinControl->useFastSend = useFastSend;
     }
 
-    connect(ui->checkUseObfuscation, SIGNAL(stateChanged(int)), this, SLOT(updateDisplayUnit()));
-    connect(ui->checkSwiftTX, SIGNAL(stateChanged(int)), this, SLOT(updateSwiftTX()));
+    connect(ui->checkUseCoinMix, SIGNAL(stateChanged(int)), this, SLOT(updateDisplayUnit()));
+    connect(ui->checkFastSend, SIGNAL(stateChanged(int)), this, SLOT(updateFastSend()));
 
     // Coin Control: clipboard actions
     QAction* clipboardQuantityAction = new QAction(tr("Copy quantity"), this);
@@ -269,26 +269,26 @@ void SendCoinsDialog::on_sendButton_clicked()
     QString strFee = "";
     recipients[0].inputType = ONLY_DENOMINATED;
 
-    if (ui->checkUseObfuscation->isChecked()) {
+    if (ui->checkUseCoinMix->isChecked()) {
         recipients[0].inputType = ONLY_DENOMINATED;
         strFunds = tr("using") + " <b>" + tr("anonymous funds") + "</b>";
         QString strNearestAmount(
             BitcoinUnits::formatWithUnit(
                 model->getOptionsModel()->getDisplayUnit(), 0.1 * COIN));
         strFee = QString(tr(
-            "(obfuscation requires this amount to be rounded up to the nearest %1).")
+            "(coinmix requires this amount to be rounded up to the nearest %1).")
                              .arg(strNearestAmount));
     } else {
         recipients[0].inputType = ALL_COINS;
         strFunds = tr("using") + " <b>" + tr("any available funds (not recommended)") + "</b>";
     }
 
-    if (ui->checkSwiftTX->isChecked()) {
-        recipients[0].useSwiftTX = true;
+    if (ui->checkFastSend->isChecked()) {
+        recipients[0].useFastSend = true;
         strFunds += " ";
-        strFunds += tr("and SwiftTX");
+        strFunds += tr("and FastSend");
     } else {
-        recipients[0].useSwiftTX = false;
+        recipients[0].useFastSend = false;
     }
 
 
@@ -572,8 +572,8 @@ void SendCoinsDialog::setBalance(const CAmount& balance, const CAmount& unconfir
     if (model && model->getOptionsModel()) {
         uint64_t bal = 0;
         QSettings settings;
-        settings.setValue("bUseObfuScation", ui->checkUseObfuscation->isChecked());
-        if (ui->checkUseObfuscation->isChecked()) {
+        settings.setValue("bUseCoinMix", ui->checkUseCoinMix->isChecked());
+        if (ui->checkUseCoinMix->isChecked()) {
             bal = anonymizedBalance;
         } else {
             bal = balance;
@@ -590,18 +590,18 @@ void SendCoinsDialog::updateDisplayUnit()
 
     setBalance(model->getBalance(), model->getUnconfirmedBalance(), model->getImmatureBalance(), model->getAnonymizedBalance(),
         model->getWatchBalance(), model->getWatchUnconfirmedBalance(), model->getWatchImmatureBalance());
-    CoinControlDialog::coinControl->useObfuScation = ui->checkUseObfuscation->isChecked();
+    CoinControlDialog::coinControl->useCoinMix = ui->checkUseCoinMix->isChecked();
     coinControlUpdateLabels();
     ui->customFee->setDisplayUnit(model->getOptionsModel()->getDisplayUnit());
     updateMinFeeLabel();
     updateSmartFeeLabel();
 }
 
-void SendCoinsDialog::updateSwiftTX()
+void SendCoinsDialog::updateFastSend()
 {
     QSettings settings;
-    settings.setValue("bUseSwiftTX", ui->checkSwiftTX->isChecked());
-    CoinControlDialog::coinControl->useSwiftTX = ui->checkSwiftTX->isChecked();
+    settings.setValue("bUseFastSend", ui->checkFastSend->isChecked());
+    CoinControlDialog::coinControl->useFastSend = ui->checkFastSend->isChecked();
     coinControlUpdateLabels();
 }
 
@@ -903,7 +903,7 @@ void SendCoinsDialog::coinControlChangeEdited(const QString& text)
             ui->labelCoinControlChangeLabel->setText("");
         } else if (!addr.IsValid()) // Invalid address
         {
-            ui->labelCoinControlChangeLabel->setText(tr("Warning: Invalid PIVX address"));
+            ui->labelCoinControlChangeLabel->setText(tr("Warning: Invalid Sling address"));
         } else // Valid address
         {
             CPubKey pubkey;
@@ -943,7 +943,7 @@ void SendCoinsDialog::coinControlUpdateLabels()
             CoinControlDialog::payAmounts.append(entry->getValue().amount);
     }
 
-    ui->checkUseObfuscation->setChecked(CoinControlDialog::coinControl->useObfuScation);
+    ui->checkUseCoinMix->setChecked(CoinControlDialog::coinControl->useCoinMix);
 
     if (CoinControlDialog::coinControl->HasSelected()) {
         // actual coin control calculation

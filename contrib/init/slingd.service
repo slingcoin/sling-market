@@ -1,0 +1,26 @@
+[Unit]
+Description=Sling Market's distributed currency daemon
+After=network.target
+
+[Service]
+User=sling
+Group=sling
+
+Type=forking
+PIDFile=/var/lib/slingd/slingd.pid
+
+ExecStart=/usr/bin/slingd -daemon -pid=/var/lib/slingd/slingd.pid \
+          -conf=/etc/sling/sling.conf -datadir=/var/lib/slingd
+
+ExecStop=-/usr/bin/sling-cli -conf=/etc/sling/sling.conf \
+         -datadir=/var/lib/slingd stop
+
+Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=2s
+StartLimitInterval=120s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

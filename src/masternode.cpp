@@ -1,12 +1,12 @@
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2017 The PIVX developers
+// Copyright (c) 2015-2017 The SLING developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "masternode.h"
 #include "addrman.h"
 #include "masternodeman.h"
-#include "obfuscation.h"
+#include "coinmix.h"
 #include "sync.h"
 #include "util.h"
 #include <boost/lexical_cast.hpp>
@@ -211,7 +211,7 @@ void CMasternode::Check(bool forceCheck)
     if (!unitTest) {
         CValidationState state;
         CMutableTransaction tx = CMutableTransaction();
-        CTxOut vout = CTxOut(9999.99 * COIN, obfuScationPool.collateralPubKey);
+        CTxOut vout = CTxOut(9999.99 * COIN, CoinMixPool.collateralPubKey);
         tx.vin.push_back(vin);
         tx.vout.push_back(vout);
 
@@ -400,7 +400,7 @@ bool CMasternodeBroadcast::Create(std::string strService, std::string strKeyMast
         return false;
     }
 
-    if (!obfuScationSigner.GetKeysFromSecret(strKeyMasternode, keyMasternodeNew, pubKeyMasternodeNew)) {
+    if (!CoinMixSigner.GetKeysFromSecret(strKeyMasternode, keyMasternodeNew, pubKeyMasternodeNew)) {
         strErrorRet = strprintf("Invalid masternode key %s", strKeyMasternode);
         LogPrintf("CMasternodeBroadcast::Create -- %s\n", strErrorRet);
         return false;
@@ -509,7 +509,7 @@ bool CMasternodeBroadcast::CheckAndUpdate(int& nDos)
     }
 
     std::string errorMessage = "";
-    if (!obfuScationSigner.VerifyMessage(pubKeyCollateralAddress, sig, strMessage, errorMessage)) {
+    if (!CoinMixSigner.VerifyMessage(pubKeyCollateralAddress, sig, strMessage, errorMessage)) {
         LogPrintf("mnb - Got bad Masternode address signature\n");
         nDos = 100;
         return false;
@@ -572,7 +572,7 @@ bool CMasternodeBroadcast::CheckInputsAndAdd(int& nDoS)
 
     CValidationState state;
     CMutableTransaction tx = CMutableTransaction();
-    CTxOut vout = CTxOut(9999.99 * COIN, obfuScationPool.collateralPubKey);
+    CTxOut vout = CTxOut(9999.99 * COIN, CoinMixPool.collateralPubKey);
     tx.vin.push_back(vin);
     tx.vout.push_back(vout);
 
@@ -609,7 +609,7 @@ bool CMasternodeBroadcast::CheckInputsAndAdd(int& nDoS)
     GetTransaction(vin.prevout.hash, tx2, hashBlock, true);
     BlockMap::iterator mi = mapBlockIndex.find(hashBlock);
     if (mi != mapBlockIndex.end() && (*mi).second) {
-        CBlockIndex* pMNIndex = (*mi).second;                                                        // block for 1000 PIVX tx -> 1 confirmation
+        CBlockIndex* pMNIndex = (*mi).second;                                                        // block for 1000 Sling tx -> 1 confirmation
         CBlockIndex* pConfIndex = chainActive[pMNIndex->nHeight + MASTERNODE_MIN_CONFIRMATIONS - 1]; // block where tx got MASTERNODE_MIN_CONFIRMATIONS
         if (pConfIndex->GetBlockTime() > sigTime) {
             LogPrintf("mnb - Bad sigTime %d for Masternode %s (%i conf block is at %d)\n",
@@ -652,12 +652,12 @@ bool CMasternodeBroadcast::Sign(CKey& keyCollateralAddress)
 
     std::string strMessage = addr.ToString() + boost::lexical_cast<std::string>(sigTime) + vchPubKey + vchPubKey2 + boost::lexical_cast<std::string>(protocolVersion);
 
-    if (!obfuScationSigner.SignMessage(strMessage, errorMessage, sig, keyCollateralAddress)) {
+    if (!CoinMixSigner.SignMessage(strMessage, errorMessage, sig, keyCollateralAddress)) {
         LogPrintf("CMasternodeBroadcast::Sign() - Error: %s\n", errorMessage);
         return false;
     }
 
-    if (!obfuScationSigner.VerifyMessage(pubKeyCollateralAddress, sig, strMessage, errorMessage)) {
+    if (!CoinMixSigner.VerifyMessage(pubKeyCollateralAddress, sig, strMessage, errorMessage)) {
         LogPrintf("CMasternodeBroadcast::Sign() - Error: %s\n", errorMessage);
         return false;
     }
@@ -690,12 +690,12 @@ bool CMasternodePing::Sign(CKey& keyMasternode, CPubKey& pubKeyMasternode)
     sigTime = GetAdjustedTime();
     std::string strMessage = vin.ToString() + blockHash.ToString() + boost::lexical_cast<std::string>(sigTime);
 
-    if (!obfuScationSigner.SignMessage(strMessage, errorMessage, vchSig, keyMasternode)) {
+    if (!CoinMixSigner.SignMessage(strMessage, errorMessage, vchSig, keyMasternode)) {
         LogPrintf("CMasternodePing::Sign() - Error: %s\n", errorMessage);
         return false;
     }
 
-    if (!obfuScationSigner.VerifyMessage(pubKeyMasternode, vchSig, strMessage, errorMessage)) {
+    if (!CoinMixSigner.VerifyMessage(pubKeyMasternode, vchSig, strMessage, errorMessage)) {
         LogPrintf("CMasternodePing::Sign() - Error: %s\n", errorMessage);
         return false;
     }
@@ -731,7 +731,7 @@ bool CMasternodePing::CheckAndUpdate(int& nDos, bool fRequireEnabled)
             std::string strMessage = vin.ToString() + blockHash.ToString() + boost::lexical_cast<std::string>(sigTime);
 
             std::string errorMessage = "";
-            if (!obfuScationSigner.VerifyMessage(pmn->pubKeyMasternode, vchSig, strMessage, errorMessage)) {
+            if (!CoinMixSigner.VerifyMessage(pmn->pubKeyMasternode, vchSig, strMessage, errorMessage)) {
                 LogPrintf("CMasternodePing::CheckAndUpdate - Got bad Masternode address signature %s\n", vin.prevout.hash.ToString());
                 nDos = 33;
                 return false;

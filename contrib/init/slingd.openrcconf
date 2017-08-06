@@ -1,0 +1,26 @@
+# /etc/conf.d/slingd: config file for /etc/init.d/slingd
+
+# Config file location
+#BITCOIND_CONFIGFILE="/etc/sling/sling.conf"
+
+# What directory to write pidfile to?  (created and owned by $BITCOIND_USER)
+#BITCOIND_PIDDIR="/var/run/slingd"
+
+# What filename to give the pidfile
+#BITCOIND_PIDFILE="${BITCOIND_PIDDIR}/slingd.pid"
+
+# Where to write slingd data (be mindful that the blockchain is large)
+#BITCOIND_DATADIR="/var/lib/slingd"
+
+# User and group to own slingd process
+#BITCOIND_USER="sling"
+#BITCOIND_GROUP="sling"
+
+# Path to slingd executable
+#BITCOIND_BIN="/usr/bin/slingd"
+
+# Nice value to run slingd under
+#BITCOIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+BITCOIND_OPTS=""

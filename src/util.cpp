@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2017 The PIVX developers
+// Copyright (c) 2015-2017 The SLING developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/pivx-config.h"
+#include "config/sling-config.h"
 #endif
 
 #include "util.h"
@@ -105,22 +105,22 @@ std::string to_internal(const std::string&);
 
 using namespace std;
 
-//PIVX only features
+//Sling only features
 bool fMasterNode = false;
 string strMasterNodePrivKey = "";
 string strMasterNodeAddr = "";
 bool fLiteMode = false;
-bool fEnableSwiftTX = true;
-int nSwiftTXDepth = 5;
-int nObfuscationRounds = 2;
-int nAnonymizePivxAmount = 1000;
+bool fEnableFastSend = true;
+int nFastSendDepth = 5;
+int nCoinMixRounds = 2;
+int nAnonymizeSlingAmount = 1000;
 int nLiquidityProvider = 0;
 /** Spork enforcement enabled time */
 int64_t enforceMasternodePaymentsTime = 4085657524;
 bool fSucessfullyLoaded = false;
-bool fEnableObfuscation = false;
-/** All denominations used by obfuscation */
-std::vector<int64_t> obfuScationDenominations;
+bool fEnableCoinMix = false;
+/** All denominations used by coinmix */
+std::vector<int64_t> CoinMixDenominations;
 string strBudgetMode = "";
 
 map<string, string> mapArgs;
@@ -231,10 +231,10 @@ bool LogAcceptCategory(const char* category)
             const vector<string>& categories = mapMultiArgs["-debug"];
             ptrCategory.reset(new set<string>(categories.begin(), categories.end()));
             // thread_specific_ptr automatically deletes the set when the thread ends.
-            // "pivx" is a composite category enabling all PIVX-related debug output
-            if (ptrCategory->count(string("pivx"))) {
-                ptrCategory->insert(string("obfuscation"));
-                ptrCategory->insert(string("swifttx"));
+            // "sling" is a composite category enabling all Sling-related debug output
+            if (ptrCategory->count(string("sling"))) {
+                ptrCategory->insert(string("coinmix"));
+                ptrCategory->insert(string("fastsend"));
                 ptrCategory->insert(string("masternode"));
                 ptrCategory->insert(string("mnpayments"));
                 ptrCategory->insert(string("mnbudget"));
@@ -396,7 +396,7 @@ static std::string FormatException(std::exception* pex, const char* pszThread)
     char pszModule[MAX_PATH] = "";
     GetModuleFileNameA(NULL, pszModule, sizeof(pszModule));
 #else
-    const char* pszModule = "pivx";
+    const char* pszModule = "sling";
 #endif
     if (pex)
         return strprintf(
@@ -417,13 +417,13 @@ void PrintExceptionContinue(std::exception* pex, const char* pszThread)
 boost::filesystem::path GetDefaultDataDir()
 {
     namespace fs = boost::filesystem;
-// Windows < Vista: C:\Documents and Settings\Username\Application Data\PIVX
-// Windows >= Vista: C:\Users\Username\AppData\Roaming\PIVX
-// Mac: ~/Library/Application Support/PIVX
-// Unix: ~/.pivx
+// Windows < Vista: C:\Documents and Settings\Username\Application Data\Sling
+// Windows >= Vista: C:\Users\Username\AppData\Roaming\Sling
+// Mac: ~/Library/Application Support/Sling
+// Unix: ~/.sling
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "PIVX";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "Sling";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -435,10 +435,10 @@ boost::filesystem::path GetDefaultDataDir()
     // Mac
     pathRet /= "Library/Application Support";
     TryCreateDirectory(pathRet);
-    return pathRet / "PIVX";
+    return pathRet / "Sling";
 #else
     // Unix
-    return pathRet / ".pivx";
+    return pathRet / ".sling";
 #endif
 #endif
 }
@@ -485,7 +485,7 @@ void ClearDatadirCache()
 
 boost::filesystem::path GetConfigFile()
 {
-    boost::filesystem::path pathConfigFile(GetArg("-conf", "pivx.conf"));
+    boost::filesystem::path pathConfigFile(GetArg("-conf", "sling.conf"));
     if (!pathConfigFile.is_complete())
         pathConfigFile = GetDataDir(false) / pathConfigFile;
 
@@ -499,25 +499,67 @@ boost::filesystem::path GetMasternodeConfigFile()
     return pathConfigFile;
 }
 
+static std::string GenerateRandomString(unsigned int len) {
+    if (len == 0){
+        len = 24;
+    }
+    srand(time(NULL) + len); //seed srand before using
+    char s[len];
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+
+    for (unsigned int i = 0; i < len; ++i) {
+        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+    s[len] = 0;
+    std::string sPassword(s);
+    return sPassword;
+}
+
+static unsigned int RandomIntegerRange(unsigned int nMin, unsigned int nMax)
+{
+  srand(time(NULL) + nMax); //seed srand before using
+  return nMin + rand() % (nMax - nMin) + 1;
+}
+
+static void WriteConfigFile(FILE* configFile)
+{
+    fputs ("#Do not use special characters with username/password\n", configFile);
+    std::string sRPCpassword = "rpcpassword=" + GenerateRandomString(RandomIntegerRange(18, 24)) + "\n";
+    std::string sUserID = "rpcuser=" + GenerateRandomString(RandomIntegerRange(7, 11)) + "\n";
+    fputs (sUserID.c_str(), configFile);
+    fputs (sRPCpassword.c_str(), configFile);
+    fputs ("rpcport=31135\n", configFile);
+    fputs ("port=31145\n",configFile);
+    fclose(configFile);
+    ReadConfigFile(mapArgs, mapMultiArgs);
+}
+
 void ReadConfigFile(map<string, string>& mapSettingsRet,
     map<string, vector<string> >& mapMultiSettingsRet)
 {
     boost::filesystem::ifstream streamConfig(GetConfigFile());
-    if (!streamConfig.good()) {
-        // Create empty pivx.conf if it does not exist
+
+    if (!streamConfig.good()){
+        // Create dynamic.conf if it does not exist
         FILE* configFile = fopen(GetConfigFile().string().c_str(), "a");
-        if (configFile != NULL)
-            fclose(configFile);
-        return; // Nothing to read, so just return
+        if (configFile != NULL) {
+            // Write dynamic.conf file with random username and password.
+            WriteConfigFile(configFile);
+            // New dynamic.conf file written, now read it.
+        }
     }
 
-    set<string> setOptions;
+    std::set<std::string> setOptions;
     setOptions.insert("*");
 
-    for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it) {
-        // Don't overwrite existing settings so command line settings override pivx.conf
-        string strKey = string("-") + it->string_key;
-        string strValue = it->value[0];
+    for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it)
+    {
+        // Don't overwrite existing settings so command line settings override dynamic.conf
+        std::string strKey = std::string("-") + it->string_key;
+        std::string strValue = it->value[0];
         InterpretNegativeSetting(strKey, strValue);
         if (mapSettingsRet.count(strKey) == 0)
             mapSettingsRet[strKey] = strValue;
@@ -530,7 +572,7 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
 #ifndef WIN32
 boost::filesystem::path GetPidFile()
 {
-    boost::filesystem::path pathPidFile(GetArg("-pid", "pivxd.pid"));
+    boost::filesystem::path pathPidFile(GetArg("-pid", "slingd.pid"));
     if (!pathPidFile.is_complete()) pathPidFile = GetDataDir() / pathPidFile;
     return pathPidFile;
 }

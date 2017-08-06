@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2017 The PIVX developers
+// Copyright (c) 2015-2017 The SLING developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -19,10 +19,10 @@
 #include "masternodeman.h"
 #include "merkleblock.h"
 #include "net.h"
-#include "obfuscation.h"
+#include "coinmix.h"
 #include "pow.h"
 #include "spork.h"
-#include "swifttx.h"
+#include "fastsend.h"
 #include "txdb.h"
 #include "txmempool.h"
 #include "ui_interface.h"
@@ -41,7 +41,7 @@ using namespace boost;
 using namespace std;
 
 #if defined(NDEBUG)
-#error "PIVX cannot be compiled without assertions."
+#error "Sling cannot be compiled without assertions."
 #endif
 
 /**
@@ -889,8 +889,8 @@ int GetInputAgeIX(uint256 nTXHash, CTxIn& vin)
         if (i != mapTxLocks.end()) {
             sigs = (*i).second.CountSignatures();
         }
-        if (sigs >= SWIFTTX_SIGNATURES_REQUIRED) {
-            return nSwiftTXDepth + nResult;
+        if (sigs >= FASTSEND_SIGNATURES_REQUIRED) {
+            return nFastSendDepth + nResult;
         }
     }
 
@@ -905,8 +905,8 @@ int GetIXConfirmations(uint256 nTXHash)
     if (i != mapTxLocks.end()) {
         sigs = (*i).second.CountSignatures();
     }
-    if (sigs >= SWIFTTX_SIGNATURES_REQUIRED) {
-        return nSwiftTXDepth;
+    if (sigs >= FASTSEND_SIGNATURES_REQUIRED) {
+        return nFastSendDepth;
     }
 
     return 0;
@@ -1108,7 +1108,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransa
     if (pool.exists(hash))
         return false;
 
-    // ----------- swiftTX transaction scanning -----------
+    // ----------- FastSend transaction scanning -----------
 
     BOOST_FOREACH (const CTxIn& in, tx.vin) {
         if (mapLockedInputs.count(in.prevout)) {
@@ -1198,7 +1198,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransa
 
         // Don't accept it if it can't get into a block
         // but prioritise dstx and don't check fees for it
-        if (mapObfuscationBroadcastTxes.count(hash)) {
+        if (mapCoinMixBroadcastTxes.count(hash)) {
             mempool.PrioritiseTransaction(hash, hash.ToString(), 1000, 0.1 * COIN);
         } else if (!ignoreFees) {
             CAmount txMinFee = GetMinRelayFee(tx, nSize, true);
@@ -1296,7 +1296,7 @@ bool AcceptableInputs(CTxMemPool& pool, CValidationState& state, const CTransact
     if (pool.exists(hash))
         return false;
 
-    // ----------- swiftTX transaction scanning -----------
+    // ----------- FastSend transaction scanning -----------
 
     BOOST_FOREACH (const CTxIn& in, tx.vin) {
         if (mapLockedInputs.count(in.prevout)) {
@@ -2276,7 +2276,7 @@ static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
 
 void ThreadScriptCheck()
 {
-    RenameThread("pivx-scriptch");
+    RenameThread("sling-scriptch");
     scriptcheckqueue.Thread();
 }
 
@@ -2722,7 +2722,7 @@ bool DisconnectBlocksAndReprocess(int blocks)
 /*
     DisconnectBlockAndInputs
 
-    Remove conflicting blocks for successful SwiftTX transaction locks
+    Remove conflicting blocks for successful FastSend transaction locks
     This should be very rare (Probably will never happen)
 */
 // ***TODO*** clean up here
@@ -3328,9 +3328,9 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
                 return state.DoS(100, error("CheckBlock() : more than one coinstake"));
     }
 
-    // ----------- swiftTX transaction scanning -----------
+    // ----------- FastSend transaction scanning -----------
 
-    if (IsSporkActive(SPORK_3_SWIFTTX_BLOCK_FILTERING)) {
+    if (IsSporkActive(SPORK_3_FASTSEND_BLOCK_FILTERING)) {
         BOOST_FOREACH (const CTransaction& tx, block.vtx) {
             if (!tx.IsCoinBase()) {
                 //only reject blocks when it's based on complete consensus
@@ -3720,7 +3720,7 @@ bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDis
 
     if (!fLiteMode) {
         if (masternodeSync.RequestedMasternodeAssets > MASTERNODE_SYNC_LIST) {
-            obfuScationPool.NewBlock();
+            CoinMixPool.NewBlock();
             masternodePayments.ProcessBlock(GetHeight() + 10);
             budget.NewBlock();
         }
@@ -4492,7 +4492,7 @@ bool static AlreadyHave(const CInv& inv)
                pcoinsTip->HaveCoins(inv.hash);
     }
     case MSG_DSTX:
-        return mapObfuscationBroadcastTxes.count(inv.hash);
+        return mapCoinMixBroadcastTxes.count(inv.hash);
     case MSG_BLOCK:
         return mapBlockIndex.count(inv.hash);
     case MSG_TXLOCK_REQUEST:
@@ -4739,10 +4739,10 @@ void static ProcessGetData(CNode* pfrom)
                 }
 
                 if (!pushed && inv.type == MSG_DSTX) {
-                    if (mapObfuscationBroadcastTxes.count(inv.hash)) {
+                    if (mapCoinMixBroadcastTxes.count(inv.hash)) {
                         CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                         ss.reserve(1000);
-                        ss << mapObfuscationBroadcastTxes[inv.hash].tx << mapObfuscationBroadcastTxes[inv.hash].vin << mapObfuscationBroadcastTxes[inv.hash].vchSig << mapObfuscationBroadcastTxes[inv.hash].sigTime;
+                        ss << mapCoinMixBroadcastTxes[inv.hash].tx << mapCoinMixBroadcastTxes[inv.hash].vin << mapCoinMixBroadcastTxes[inv.hash].vchSig << mapCoinMixBroadcastTxes[inv.hash].sigTime;
 
                         pfrom->PushMessage("dstx", ss);
                         pushed = true;
@@ -5141,7 +5141,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 std::string strMessage = tx.GetHash().ToString() + boost::lexical_cast<std::string>(sigTime);
 
                 std::string errorMessage = "";
-                if (!obfuScationSigner.VerifyMessage(pmn->pubKeyMasternode, vchSig, strMessage, errorMessage)) {
+                if (!CoinMixSigner.VerifyMessage(pmn->pubKeyMasternode, vchSig, strMessage, errorMessage)) {
                     LogPrintf("dstx: Got bad masternode address signature %s \n", vin.ToString());
                     //pfrom->Misbehaving(20);
                     return false;
@@ -5152,14 +5152,14 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 ignoreFees = true;
                 pmn->allowFreeTx = false;
 
-                if (!mapObfuscationBroadcastTxes.count(tx.GetHash())) {
-                    CObfuscationBroadcastTx dstx;
+                if (!mapCoinMixBroadcastTxes.count(tx.GetHash())) {
+                    CCoinMixBroadcastTx dstx;
                     dstx.tx = tx;
                     dstx.vin = vin;
                     dstx.vchSig = vchSig;
                     dstx.sigTime = sigTime;
 
-                    mapObfuscationBroadcastTxes.insert(make_pair(tx.GetHash(), dstx));
+                    mapCoinMixBroadcastTxes.insert(make_pair(tx.GetHash(), dstx));
                 }
             }
         }
@@ -5573,11 +5573,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         }
     } else {
         //probably one the extensions
-        obfuScationPool.ProcessMessageObfuscation(pfrom, strCommand, vRecv);
+        CoinMixPool.ProcessMessageCoinMix(pfrom, strCommand, vRecv);
         mnodeman.ProcessMessage(pfrom, strCommand, vRecv);
         budget.ProcessMessage(pfrom, strCommand, vRecv);
         masternodePayments.ProcessMessageMasternodePayments(pfrom, strCommand, vRecv);
-        ProcessMessageSwiftTX(pfrom, strCommand, vRecv);
+        ProcessMessageFastSend(pfrom, strCommand, vRecv);
         ProcessSpork(pfrom, strCommand, vRecv);
         masternodeSync.ProcessMessage(pfrom, strCommand, vRecv);
     }

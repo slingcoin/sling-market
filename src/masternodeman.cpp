@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2017 The PIVX developers
+// Copyright (c) 2015-2017 The SLING developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -7,7 +7,7 @@
 #include "activemasternode.h"
 #include "addrman.h"
 #include "masternode.h"
-#include "obfuscation.h"
+#include "coinmix.h"
 #include "spork.h"
 #include "util.h"
 #include <boost/filesystem.hpp>
@@ -646,10 +646,10 @@ void CMasternodeMan::ProcessMasternodeConnections()
 
     LOCK(cs_vNodes);
     BOOST_FOREACH (CNode* pnode, vNodes) {
-        if (pnode->fObfuScationMaster) {
-            if (obfuScationPool.pSubmittedToMasternode != NULL && pnode->addr == obfuScationPool.pSubmittedToMasternode->addr) continue;
+        if (pnode->fCoinMixMaster) {
+            if (CoinMixPool.pSubmittedToMasternode != NULL && pnode->addr == CoinMixPool.pSubmittedToMasternode->addr) continue;
             LogPrintf("Closing Masternode connection peer=%i \n", pnode->GetId());
-            pnode->fObfuScationMaster = false;
+            pnode->fCoinMixMaster = false;
             pnode->Release();
         }
     }
@@ -657,7 +657,7 @@ void CMasternodeMan::ProcessMasternodeConnections()
 
 void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
 {
-    if (fLiteMode) return; //disable all Obfuscation/Masternode related functionality
+    if (fLiteMode) return; //disable all CoinMix/Masternode related functionality
     if (!masternodeSync.IsBlockchainSynced()) return;
 
     LOCK(cs_process_message);
@@ -683,14 +683,14 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
 
         // make sure the vout that was signed is related to the transaction that spawned the Masternode
         //  - this is expensive, so it's only done once per Masternode
-        if (!obfuScationSigner.IsVinAssociatedWithPubkey(mnb.vin, mnb.pubKeyCollateralAddress)) {
+        if (!CoinMixSigner.IsVinAssociatedWithPubkey(mnb.vin, mnb.pubKeyCollateralAddress)) {
             LogPrintf("mnb - Got mismatched pubkey and vin\n");
             Misbehaving(pfrom->GetId(), 33);
             return;
         }
 
         // make sure it's still unspent
-        //  - this is checked later by .check() in many places and by ThreadCheckObfuScationPool()
+        //  - this is checked later by .check() in many places and by ThreadCheckCoinMixPool()
         if (mnb.CheckInputsAndAdd(nDoS)) {
             // use this as a peer
             addrman.Add(CAddress(mnb.addr), pfrom->addr, 2 * 60 * 60);
@@ -788,7 +788,7 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
      */
 
     // Light version for OLD MASSTERNODES - fake pings, no self-activation
-    else if (strCommand == "dsee") { //ObfuScation Election Entry
+    else if (strCommand == "dsee") { //CoinMix Election Entry
 
         if (IsSporkActive(SPORK_10_MASTERNODE_PAY_UPDATED_NODES)) return;
 
@@ -851,7 +851,7 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
         }
 
         std::string errorMessage = "";
-        if (!obfuScationSigner.VerifyMessage(pubkey, vchSig, strMessage, errorMessage)) {
+        if (!CoinMixSigner.VerifyMessage(pubkey, vchSig, strMessage, errorMessage)) {
             LogPrintf("dsee - Got bad Masternode address signature\n");
             Misbehaving(pfrom->GetId(), 100);
             return;
@@ -905,7 +905,7 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
         mapSeenDsee.insert(make_pair(vin.prevout, pubkey));
         // make sure the vout that was signed is related to the transaction that spawned the Masternode
         //  - this is expensive, so it's only done once per Masternode
-        if (!obfuScationSigner.IsVinAssociatedWithPubkey(vin, pubkey)) {
+        if (!CoinMixSigner.IsVinAssociatedWithPubkey(vin, pubkey)) {
             LogPrintf("dsee - Got mismatched pubkey and vin\n");
             Misbehaving(pfrom->GetId(), 100);
             return;
@@ -915,11 +915,11 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
         LogPrint("masternode", "dsee - Got NEW OLD Masternode entry %s\n", vin.prevout.hash.ToString());
 
         // make sure it's still unspent
-        //  - this is checked later by .check() in many places and by ThreadCheckObfuScationPool()
+        //  - this is checked later by .check() in many places and by ThreadCheckCoinMixPool()
 
         CValidationState state;
         CMutableTransaction tx = CMutableTransaction();
-        CTxOut vout = CTxOut(9999.99 * COIN, obfuScationPool.collateralPubKey);
+        CTxOut vout = CTxOut(9999.99 * COIN, CoinMixPool.collateralPubKey);
         tx.vin.push_back(vin);
         tx.vout.push_back(vout);
 
@@ -938,7 +938,7 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
             }
 
             // verify that sig time is legit in past
-            // should be at least not earlier than block when 1000 PIVX tx got MASTERNODE_MIN_CONFIRMATIONS
+            // should be at least not earlier than block when 1000 Sling tx got MASTERNODE_MIN_CONFIRMATIONS
             uint256 hashBlock = 0;
             CTransaction tx2;
             GetTransaction(vin.prevout.hash, tx2, hashBlock, true);
@@ -993,7 +993,7 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
         }
     }
 
-    else if (strCommand == "dseep") { //ObfuScation Election Entry Ping
+    else if (strCommand == "dseep") { //CoinMix Election Entry Ping
 
         if (IsSporkActive(SPORK_10_MASTERNODE_PAY_UPDATED_NODES)) return;
 
@@ -1032,7 +1032,7 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, std::string& strCommand, CData
                 std::string strMessage = pmn->addr.ToString() + boost::lexical_cast<std::string>(sigTime) + boost::lexical_cast<std::string>(stop);
 
                 std::string errorMessage = "";
-                if (!obfuScationSigner.VerifyMessage(pmn->pubKeyMasternode, vchSig, strMessage, errorMessage)) {
+                if (!CoinMixSigner.VerifyMessage(pmn->pubKeyMasternode, vchSig, strMessage, errorMessage)) {
                     LogPrintf("dseep - Got bad Masternode address signature %s \n", vin.prevout.hash.ToString());
                     //Misbehaving(pfrom->GetId(), 100);
                     return;
