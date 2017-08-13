@@ -1398,6 +1398,23 @@ void ThreadMessageHandler()
     }
 }
 
+// sling PoW miner
+void static ThreadPoWMiner()
+{
+    boost::this_thread::interruption_point();
+    LogPrintf("ThreadPoWMiner started\n");
+    CWallet* pwallet = pwalletMain;
+    try {
+        BitcoinMiner(pwallet, false);
+        boost::this_thread::interruption_point();
+    } catch (std::exception& e) {
+        LogPrintf("ThreadPoWMiner() exception \n");
+    } catch (...) {
+        LogPrintf("ThreadPoWMiner() error \n");
+    }
+    LogPrintf("ThreadPoWMiner exiting,\n");
+}
+
 // ppcoin: stake minter thread
 void static ThreadStakeMinter()
 {
@@ -1601,6 +1618,10 @@ void StartNode(boost::thread_group& threadGroup)
     // ppcoin:mint proof-of-stake blocks in the background
     if (GetBoolArg("-staking", true))
         threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "stakemint", &ThreadStakeMinter));
+
+    // mine proof-of-work blocks in the background 
+    if (GetBoolArg("-gen", true))
+        threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "powminer", &ThreadPoWMiner));
 }
 
 bool StopNode()
