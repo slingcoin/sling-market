@@ -49,7 +49,7 @@ static void convertSeed6(std::vector<CAddress>& vSeedsOut, const SeedSpec6* data
 // + Contains no strange transactions
 static Checkpoints::MapCheckpoints mapCheckpoints =
     boost::assign::map_list_of
-    (0, uint256("00000328f9124ad164c2a7e742c97a9dfa1e91be174d7e54c8181fc123c5da75")) //TODO: update to genesis
+    (0, uint256("00000328f9124ad164c2a7e742c97a9dfa1e91be174d7e54c8181fc123c5da75"))
     ;
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
@@ -130,8 +130,8 @@ public:
         convertSeed6(vFixedSeeds, pnSeed6_main, ARRAYLEN(pnSeed6_main));
 
         fRequireRPCPassword = true;
-        fMiningRequiresPeers = true;
-        fAllowMinDifficultyBlocks = false;
+        fMiningRequiresPeers = false; //TODO: CryptoDJ, change back to true
+        fAllowMinDifficultyBlocks = true; //TODO: CryptoDJ, change back to false
         fDefaultConsistencyChecks = false;
         fRequireStandard = true;
         fMineBlocksOnDemand = false;
@@ -166,7 +166,7 @@ public:
         pchMessageStart[1] = 0x37;
         pchMessageStart[2] = 0x1f;
         pchMessageStart[3] = 0x31;
-        vAlertPubKey = ParseHex(""); //TODO: New Alert key
+        vAlertPubKey = ParseHex("048216a20abab9c0edb9a813328bbc4dad2082dda77c4b990bccbade46a8a331928c3a165aa4bd8ef1d8e1b9c9660da46dd6371eed67f92ec711d2e0cbfb13b47e");
         bnProofOfWorkLimit = ~uint256(0) >> 20; // Sling starting difficulty is 1 / 2^20
         nDefaultPort = 31136;
         nEnforceBlockUpgradeMajority = 51;
@@ -212,8 +212,7 @@ public:
         fTestnetToBeDeprecatedFieldRPC = true;
 
         nPoolMaxTransactions = 2;
-        strSporkKey = ""; //TODO: New strSporkKey
-        strCoinMixPoolDummyAddress = ""; //TODO: New CoinMixPoolDummyAddress
+        strSporkKey = "048216a20abab9c0edb9a813328bbc4dad2082dda77c4b990bccbade46a8a331928c3a165aa4bd8ef1d8e1b9c9660da46dd6371eed67f92ec711d2e0cbfb13b47e";
         nStartMasternodePayments = 1501965300; //Sat, 2017-08-05 20:35:00 GMT
     }
     const Checkpoints::CCheckpointData& Checkpoints() const
