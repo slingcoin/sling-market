@@ -2481,6 +2481,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         }
     }
 
+    //TODO: CryptoDJ Remove PoS payment for Masternodes here
     //Masternode payment
     FillBlockPayee(txNew, nMinFee, true);
 
