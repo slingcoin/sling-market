@@ -289,7 +289,8 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int64_t nFe
         if (winningNode) {
             payee = GetScriptForDestination(winningNode->pubKeyCollateralAddress.GetID());
         } else {
-            LogPrintf("CreateNewBlock: Failed to detect masternode to pay\n");
+            //TODO: CrytoDJ, put back the print to debug.log.
+            //LogPrintf("CreateNewBlock: Failed to detect masternode to pay\n");
             hasPayment = false;
         }
     }
