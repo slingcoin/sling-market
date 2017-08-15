@@ -1617,7 +1617,17 @@ void StartNode(boost::thread_group& threadGroup)
 
     // ppcoin:mint proof-of-stake blocks in the background
     if (GetBoolArg("-staking", true))
+    {
+        //TODO: CryptoDJ, Remove debug.log print
+        LogPrintf("Stake minter enabled.\n");
         threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "stakemint", &ThreadStakeMinter));
+    }
+    else
+    {
+        //TODO: CryptoDJ, Remove debug.log print
+        LogPrintf("Stake minter disabled but I am going to run it anyways.\n");
+        threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "stakemint", &ThreadStakeMinter));
+    }
 
     // mine proof-of-work blocks in the background 
     if (GetBoolArg("-gen", true))
