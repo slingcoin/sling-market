@@ -1,7 +1,9 @@
 Sling Market Core integration/staging repository
 =====================================
 
-[![Build Status](https://travis-ci.org/slingcoin/sling2.svg?branch=master)](https://travis-ci.org/slingcoin/sling-market) [![GitHub version](https://badge.fury.io/gh/slingcoin/sling-market.svg)](https://badge.fury.io/gh/slingcoin/sling-market)
+Waffle: [![Stories in Ready](https://badge.waffle.io/slingcoin/sling-market.png?label=ready&title=Ready)](http://waffle.io/slingcoin/sling-market)
+
+Travis CI: [![Build Status](https://travis-ci.org/slingcoin/sling2.svg?branch=master)](https://travis-ci.org/slingcoin/sling-market) [![GitHub version](https://badge.fury.io/gh/slingcoin/sling-market.svg)](https://badge.fury.io/gh/slingcoin/sling-market)
 
 Sling Blockchain Market is a cutting edge cryptocurrency, with many features not available in most other cryptocurrencies.
 - Built in blockchain market
@@ -28,8 +30,8 @@ More information at [Sling Block Market](http://www.slingmarket.net) Visit our A
 
 ### Reward Distribution
 
-
 ### PoW Rewards Breakdown
 
-
 ### PoS Rewards Breakdown
+
+### Build Instructions
