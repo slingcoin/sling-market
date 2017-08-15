@@ -1613,7 +1613,7 @@ int64_t GetBlockValue(int nHeight, bool fPoW)
     if (Params().NetworkID() == CBaseChainParams::TESTNET) {
         if (nHeight < 200 && nHeight > 0)
         {
-            return 350000 * COIN;
+            return 35000 * COIN;
         }
         else
         {
@@ -1627,7 +1627,7 @@ int64_t GetBlockValue(int nHeight, bool fPoW)
             //TODO: CryptoDJ, Adjust to total amount of old chain for swap.
             nSubsidy = 1750000 * COIN; //First block to payout swap for orginal chain Sling coin holders.
         }
-        else if (nHeight > 1) {
+        else if (nHeight >= 200) {
             nSubsidy = 7.35 * COIN;
         }
         else {
@@ -1636,9 +1636,9 @@ int64_t GetBlockValue(int nHeight, bool fPoW)
     }
     else {
         // This is a PoS block
-        if (nHeight > 0) {
+        if (nHeight >= 1) {
             nSubsidy = 0.35 * COIN; //First block to payout swap for orginal chain Sling coin holders.
-        } 
+        }
         else {
             nSubsidy = 0;
         }
