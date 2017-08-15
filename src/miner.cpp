@@ -476,10 +476,19 @@ bool fGenerateBitcoins = false;
 
 void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
 {
-    LogPrintf("SlingMiner started\n");
-    SetThreadPriority(THREAD_PRIORITY_LOWEST);
-    RenameThread("sling-miner");
-
+    if (fProofOfStake)
+    {
+        LogPrintf("SlingMinter started\n");
+        SetThreadPriority(THREAD_PRIORITY_LOWEST);
+        RenameThread("sling-minter");
+    }
+    else
+    {
+        LogPrintf("SlingMiner started\n");
+        SetThreadPriority(THREAD_PRIORITY_LOWEST);
+        RenameThread("sling-miner");
+    }
+    
     // Each thread has its own key and counter
     CReserveKey reservekey(pwallet);
     unsigned int nExtraNonce = 0;
@@ -516,10 +525,8 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
                 }
             }
         }
-        else
-        {
-            LogPrintf("fProofOfStake = false;\n");  //TODO: CryptoDJ, remove print
-        }
+        //else
+        //    LogPrintf("fProofOfStake = false;\n");  //TODO: CryptoDJ, remove print
 
         LogPrintf("Sling PoW Miner Running. Good luck!\n");
 
@@ -576,8 +583,8 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
                 continue;
             }
 
-            LogPrintf("Running SlingMiner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
-                ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
+            //LogPrintf("Running SlingMiner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
+            //    ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
 
             //
             // Search
