@@ -516,12 +516,8 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
                 }
             }
         }
-        else
-        {
-            LogPrintf("fProofOfStake = false;\n");  //TODO: CryptoDJ, remove print
-        }
-
-        LogPrintf("Sling PoW Miner Running. Good luck!\n");
+        
+        // LogPrintf("Sling PoW Miner Running. Good luck!\n");
 
         while (true) {
             unsigned int nHashesDone = 0;
@@ -576,8 +572,9 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
                 continue;
             }
 
-            LogPrintf("Running SlingMiner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
-                ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
+            //TODO: CryptoDJ, put this back?
+            //LogPrintf("Running SlingMiner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
+            //    ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
 
             //
             // Search

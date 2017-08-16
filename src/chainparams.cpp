@@ -103,7 +103,7 @@ public:
         nTargetTimespan = 1 * 60; // Sling: 1 minute
         nTargetSpacing = 1 * 60;  // Sling: 1 minute
         nLastPOWBlock = std::numeric_limits<int>::max();
-        nMaturity = 100;
+        nMaturity = 10; //TODO: CryptoDJ, increase to 100
         nMasternodeCountDrift = 20;
         nModifierUpdateBlock = 615800;
         startNewChain = false;
@@ -254,7 +254,7 @@ public:
         nDefaultPort = 31137;
         //assert(hashGenesisBlock == uint256("0x")); TODO: Get new genesis
         //assert(genesis.hashMerkleRoot == uint256("0xcf8acb7ce43a07bc66a8b9daec515df36bd0d919bae147b13ea509131cc98bf5"));
-        
+
         vFixedSeeds.clear(); //! Reg Testnet mode doesn't have any fixed seeds.
         vSeeds.clear();      //! Reg Testnet mode doesn't have any DNS seeds.
 
