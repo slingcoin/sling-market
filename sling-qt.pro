@@ -574,29 +574,18 @@ SOURCES += \
     src/compat/glibcxx_sanity.cpp \
     src/compat/strnlen.cpp \
     src/consensus/merkle.cpp \
-    src/crypto/aes.cpp \
-    src/crypto/chacha20.cpp \
-    src/crypto/hmac_sha256.cpp \
-    src/crypto/hmac_sha512.cpp \
-    src/crypto/rfc6979_hmac_sha256.cpp \
-    src/crypto/ripemd160.cpp \
-    src/crypto/scrypt.cpp \
-    src/crypto/sha1.cpp \
-    src/crypto/sha256_sse4.cpp \
-    src/crypto/sha256.cpp \
-    src/crypto/sha512.cpp \
-    src/crypto/aes_helper.c \
-    src/crypto/blake.c \
-    src/crypto/bmw.c \
-    src/crypto/cubehash.c \
-    src/crypto/echo.c \
-    src/crypto/groestl.c \
-    src/crypto/jh.c \
-    src/crypto/keccak.c \
-    src/crypto/luffa.c \
-    src/crypto/shavite.c \
-    src/crypto/simd.c \
-    src/crypto/skein.c \
+    crypto/argon2d/argon2.c \
+    crypto/argon2d/core.c \
+    crypto/argon2d/encoding.c \
+    crypto/argon2d/opt.c \
+    crypto/argon2d/thread.c \
+    crypto/blake2/blake2b.c \
+    crypto/hmac_sha256.cpp \
+    crypto/hmac_sha512.cpp \
+    crypto/ripemd160.cpp \
+    crypto/sha1.cpp \
+    crypto/sha256.cpp \
+    crypto/sha512.cpp \
     src/policy/feerate.cpp \
     src/policy/fees.cpp \
     src/policy/policy.cpp \

@@ -25,7 +25,7 @@ void ComputePassfactor(std::string ownersalt, uint256 prefactor, uint256& passfa
 bool ComputePasspoint(uint256 passfactor, CPubKey& passpoint);
 
 
-void ComputeSeedBPass(CPubKey passpoint, std::string strAddressHash, std::string strOwnerSalt, uint512& seedBPass);
+void ComputeSeedBPass(CPubKey passpoint, std::string strAddressHash, std::string strOwnerSalt, uint256& seedBPass);
 
 
 void ComputeFactorB(uint256 seedB, uint256& factorB);

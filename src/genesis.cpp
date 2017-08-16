@@ -49,7 +49,7 @@ CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesisOutput
  */
 CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
-    const char* pszTimestamp = "Washington Post 2017-08-04: A debt-ceiling crisis is on its way. Yes, again.";
+    const char* pszTimestamp = "2017-08-16: Bitcoin market cap is within touching distance of major stocks like Netflix";
     const CScript genesisOutputScript = CScript() << ParseHex("") << OP_CHECKSIG;
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
 }
