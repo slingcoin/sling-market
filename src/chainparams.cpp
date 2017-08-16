@@ -49,7 +49,7 @@ static void convertSeed6(std::vector<CAddress>& vSeedsOut, const SeedSpec6* data
 // + Contains no strange transactions
 static Checkpoints::MapCheckpoints mapCheckpoints =
     boost::assign::map_list_of
-    (0, uint256("00000328f9124ad164c2a7e742c97a9dfa1e91be174d7e54c8181fc123c5da75"))
+    (0, uint256("0x0000021e90d6ff8188c9b61fb30851922bde228df648a8324ac547ddb2693c26"))
     ;
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
@@ -60,7 +60,7 @@ static const Checkpoints::CCheckpointData data = {
 };
 
 static Checkpoints::MapCheckpoints mapCheckpointsTestnet =
-    boost::assign::map_list_of(0, uint256("0x00000d8c3f4fd81e89467dbccba05afe018d978d12c7207e884ae983f9bb5f19"));
+    boost::assign::map_list_of(0, uint256("0x00000da7f9cfca0b5a66eae610cb8c2e567f272a54c5ea7cf480c8df135967b3"));
 static const Checkpoints::CCheckpointData dataTestnet = {
     &mapCheckpointsTestnet,
     1501987810,
@@ -68,7 +68,7 @@ static const Checkpoints::CCheckpointData dataTestnet = {
     1440};
 
 static Checkpoints::MapCheckpoints mapCheckpointsRegtest =
-    boost::assign::map_list_of(0, uint256("0x001"));
+    boost::assign::map_list_of(0, uint256("0x0"));
 static const Checkpoints::CCheckpointData dataRegtest = {
     &mapCheckpointsRegtest,
     1501985300,
@@ -103,19 +103,19 @@ public:
         nTargetTimespan = 1 * 60; // Sling: 1 minute
         nTargetSpacing = 1 * 60;  // Sling: 1 minute
         nLastPOWBlock = std::numeric_limits<int>::max();
-        nMaturity = 100;
+        nMaturity = 10; //TODO: CryptoDJ, increase to 100
         nMasternodeCountDrift = 20;
         nModifierUpdateBlock = 615800;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1501986576, 1135886, Convert_UintToArith256_GetCompact(bnProofOfWorkLimit), 1, (1.337 * COIN));
+        genesis = CreateGenesisBlock(1502865184, 54026, Convert_UintToArith256_GetCompact(bnProofOfWorkLimit), 1, (1.337 * COIN));
         if(startNewChain == true) {
             MineGenesis(genesis, bnProofOfWorkLimit, true);
         }
 
         hashGenesisBlock = genesis.GetHash();
-        assert(hashGenesisBlock == uint256("0x00000328f9124ad164c2a7e742c97a9dfa1e91be174d7e54c8181fc123c5da75"));
-        assert(genesis.hashMerkleRoot == uint256("0xb8fcc02e857b1b1e1acd838130dcdca834f32b6fb28ef4c926e5d7b55d4f6229"));
+        assert(hashGenesisBlock == uint256("0x0000021e90d6ff8188c9b61fb30851922bde228df648a8324ac547ddb2693c26"));
+        assert(genesis.hashMerkleRoot == uint256("0xcf8acb7ce43a07bc66a8b9daec515df36bd0d919bae147b13ea509131cc98bf5"));
 
         vSeeds.push_back(CDNSSeedData("slingmarket.net", "seed.slingmarket.net"));     // Primary DNS Seeder from slingmarket.net
         
@@ -180,14 +180,14 @@ public:
         nModifierUpdateBlock = 51197; //approx Mon, 17 Apr 2017 04:00:00 GMT
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1501987810, 929409, Convert_UintToArith256_GetCompact(bnProofOfWorkLimit), 1, (1.337 * COIN));
+        genesis = CreateGenesisBlock(1502865349, 417171, Convert_UintToArith256_GetCompact(bnProofOfWorkLimit), 1, (1.337 * COIN));
         if(startNewChain == true) {
             MineGenesis(genesis, bnProofOfWorkLimit, true);
         }
 
         hashGenesisBlock = genesis.GetHash();
-        assert(hashGenesisBlock == uint256("0x00000d8c3f4fd81e89467dbccba05afe018d978d12c7207e884ae983f9bb5f19"));
-        assert(genesis.hashMerkleRoot == uint256("0xb8fcc02e857b1b1e1acd838130dcdca834f32b6fb28ef4c926e5d7b55d4f6229"));
+        assert(hashGenesisBlock == uint256("0x00000da7f9cfca0b5a66eae610cb8c2e567f272a54c5ea7cf480c8df135967b3"));
+        assert(genesis.hashMerkleRoot == uint256("0xcf8acb7ce43a07bc66a8b9daec515df36bd0d919bae147b13ea509131cc98bf5"));
 
         vFixedSeeds.clear();
         vSeeds.clear();
@@ -253,6 +253,7 @@ public:
         hashGenesisBlock = genesis.GetHash();
         nDefaultPort = 31137;
         //assert(hashGenesisBlock == uint256("0x")); TODO: Get new genesis
+        //assert(genesis.hashMerkleRoot == uint256("0xcf8acb7ce43a07bc66a8b9daec515df36bd0d919bae147b13ea509131cc98bf5"));
 
         vFixedSeeds.clear(); //! Reg Testnet mode doesn't have any fixed seeds.
         vSeeds.clear();      //! Reg Testnet mode doesn't have any DNS seeds.

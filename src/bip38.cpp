@@ -30,9 +30,11 @@ void DecryptAES(uint256 encryptedIn, uint256 decryptionKey, uint256& output)
 
 void ComputePreFactor(std::string strPassphrase, std::string strSalt, uint256& prefactor)
 {
+    const void* data = strPassphrase.c_str();
     //passfactor is the scrypt hash of passphrase and ownersalt (NOTE this needs to handle alt cases too in the future)
-    uint64_t s = uint256(ReverseEndianString(strSalt)).Get64();
-    scrypt_hash(strPassphrase.c_str(), strPassphrase.size(), BEGIN(s), strSalt.size() / 2, BEGIN(prefactor), 16384, 8, 8, 32);
+    //uint64_t salt = uint256(ReverseEndianString(strSalt)).Get64();
+    //scrypt_hash(strPassphrase.c_str(), strPassphrase.size(), BEGIN(salt), strSalt.size() / 2, BEGIN(prefactor), 16384, 8, 8, 32);
+    prefactor = hash_Argon2d(BEGIN(data), END(data), 1);  //TODO: CryptoDJ, add salt to hash.
 }
 
 void ComputePassfactor(std::string ownersalt, uint256 prefactor, uint256& passfactor)
@@ -50,12 +52,13 @@ bool ComputePasspoint(uint256 passfactor, CPubKey& passpoint)
     return secp256k1_ec_pubkey_create(UBEGIN(passpoint), &clen, passfactor.begin(), true) != 0;
 }
 
-void ComputeSeedBPass(CPubKey passpoint, std::string strAddressHash, std::string strOwnerSalt, uint512& seedBPass)
+void ComputeSeedBPass(CPubKey passpoint, std::string strAddressHash, std::string strOwnerSalt, uint256& seedBPass)
 {
     // Derive decryption key for seedb using scrypt with passpoint, addresshash, and ownerentropy
     string salt = ReverseEndianString(strAddressHash + strOwnerSalt);
-    uint256 s2(salt);
-    scrypt_hash(BEGIN(passpoint), HexStr(passpoint).size() / 2, BEGIN(s2), salt.size() / 2, BEGIN(seedBPass), 1024, 1, 1, 64);
+    //uint256 s2(salt);
+    //scrypt_hash(BEGIN(passpoint), END(passpoint).size() / 2, BEGIN(s2), salt.size() / 2, BEGIN(seedBPass), 1024, 1, 1, 64);
+    seedBPass = hash_Argon2d(BEGIN(passpoint), END(passpoint), 1);  //TODO: CryptoDJ, add salt to hash.
 }
 
 void ComputeFactorB(uint256 seedB, uint256& factorB)
@@ -76,11 +79,13 @@ std::string AddressToBip38Hash(std::string address)
 
 std::string BIP38_Encrypt(std::string strAddress, std::string strPassphrase, uint256 privKey)
 {
+    const void* data = strPassphrase.c_str();
     string strAddressHash = AddressToBip38Hash(strAddress);
 
-    uint512 hashed;
-    uint64_t salt = uint256(ReverseEndianString(strAddressHash)).Get64();
-    scrypt_hash(strPassphrase.c_str(), strPassphrase.size(), BEGIN(salt), strAddressHash.size() / 2, BEGIN(hashed), 16384, 8, 8, 64);
+    uint256 hashed;
+    //uint64_t salt = uint256(ReverseEndianString(strAddressHash)).Get64();
+    //scrypt_hash(strPassphrase.c_str(), strPassphrase.size(), BEGIN(salt), strAddressHash.size() / 2, BEGIN(hashed), 16384, 8, 8, 64);
+    hashed = (uint256)hash_Argon2d(BEGIN(data), END(data), 1);  //TODO: CryptoDJ, add salt to hash.
 
     uint256 derivedHalf1(hashed.ToString().substr(64, 64));
     uint256 derivedHalf2(hashed.ToString().substr(0, 64));
@@ -138,10 +143,12 @@ bool BIP38_Decrypt(std::string strPassphrase, std::string strEncryptedKey, uint2
 
     //not ec multiplied
     if (type == uint256(0x42)) {
-        uint512 hashed;
+        const void* data = strPassphrase.c_str();
+        uint256 hashed;
         encryptedPart1 = uint256(ReverseEndianString(strKey.substr(14, 32)));
-        uint64_t salt = uint256(ReverseEndianString(strAddressHash)).Get64();
-        scrypt_hash(strPassphrase.c_str(), strPassphrase.size(), BEGIN(salt), strAddressHash.size() / 2, BEGIN(hashed), 16384, 8, 8, 64);
+        //uint64_t salt = uint256(ReverseEndianString(strAddressHash)).Get64();
+        //scrypt_hash(strPassphrase.c_str(), strPassphrase.size(), BEGIN(salt), strAddressHash.size() / 2, BEGIN(hashed), 16384, 8, 8, 64);
+        hashed = hash_Argon2d(BEGIN(data), END(data), 1);  //TODO: CryptoDJ, add salt to hash.
 
         uint256 derivedHalf1(hashed.ToString().substr(64, 64));
         uint256 derivedHalf2(hashed.ToString().substr(0, 64));
@@ -182,7 +189,7 @@ bool BIP38_Decrypt(std::string strPassphrase, std::string strEncryptedKey, uint2
     if (!ComputePasspoint(passfactor, passpoint))
         return false;
 
-    uint512 seedBPass;
+    uint256 seedBPass;
     ComputeSeedBPass(passpoint, strAddressHash, ownersalt, seedBPass);
 
     //get derived halfs, being mindful for endian switch
