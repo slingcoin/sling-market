@@ -79,7 +79,7 @@ public:
 
     uint256 GetHash()
     {
-        uint256 n = HashQuark(BEGIN(nSporkID), END(nTimeSigned));
+        uint256 n = hash_Argon2d(BEGIN(nSporkID), END(nTimeSigned), 1);
         return n;
     }
 
