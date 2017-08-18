@@ -28,6 +28,7 @@ int nSubmittedFinalBudget;
 int GetBudgetPaymentCycleBlocks()
 {
     // Amount of blocks in a months period of time (using 1 minutes per) = (60*24*30)
+    // TODO: CryptoDJ, Update number of blocks per month.
     if (Params().NetworkID() == CBaseChainParams::MAIN) return 43200;
     //for testing purposes
 
@@ -476,7 +477,7 @@ void CBudgetManager::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees, b
         ++it;
     }
 
-    CAmount blockValue = GetBlockValue(pindexPrev->nHeight);
+    CAmount blockValue = GetBlockValue(pindexPrev->nHeight, nFees, fProofOfStake);
 
     if (fProofOfStake) {
         if (nHighestCount > 0) {
