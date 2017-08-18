@@ -337,7 +337,7 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn, CWallet* pwallet, 
             //Masternode and general budget payments
 
             // NOTE: unlike in bitcoin, we need to pass PREVIOUS block height here
-            CAmount blockReward = nFees + GetBlockValue(nHeight);
+            CAmount blockReward = nFees + GetBlockValue(nHeight, 0, fProofOfStake);
 
             // Compute regular coinbase transaction.
             txNew.vout[0].nValue = blockReward;

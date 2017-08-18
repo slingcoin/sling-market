@@ -196,9 +196,9 @@ std::string BlockToString(CBlockIndex* pBlock)
     CBlock block;
     ReadBlockFromDisk(block, pBlock);
 
-    int64_t Fees = 0;
-    int64_t OutVolume = 0;
-    int64_t Reward = 0;
+    CAmount Fees = 0;
+    CAmount OutVolume = 0;
+    CAmount Reward = 0;
 
     std::string TxLabels[] = {_("Hash"), _("From"), _("Amount"), _("To"), _("Amount")};
 
@@ -207,8 +207,8 @@ std::string BlockToString(CBlockIndex* pBlock)
         const CTransaction& tx = block.vtx[i];
         TxContent += TxToRow(tx);
 
-        int64_t In = getTxIn(tx);
-        int64_t Out = tx.GetValueOut();
+        CAmount In = getTxIn(tx);
+        CAmount Out = tx.GetValueOut();
         if (tx.IsCoinBase())
             Reward += Out;
         else if (In < 0)
@@ -220,11 +220,11 @@ std::string BlockToString(CBlockIndex* pBlock)
     }
     TxContent += "</table>";
 
-    int64_t Generated;
+    CAmount Generated;
     if (pBlock->nHeight == 0)
         Generated = OutVolume;
     else
-        Generated = GetBlockValue(pBlock->nHeight - 1);
+        Generated = GetBlockValue(pBlock->nHeight - 1, Fees, pBlock->IsProofOfStake());
 
     std::string BlockContentCells[] =
         {
