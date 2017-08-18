@@ -69,7 +69,7 @@ unsigned int nCoinCacheSize = 5000;
 bool fAlerts = DEFAULT_ALERTS;
 
 unsigned int nStakeMinAge = 60 * 60;
-int64_t nReserveBalance = 0;
+CAmount nReserveBalance = 0;
 
 /** Fees smaller than this (in duffs) are considered zero fee (for relaying and mining)
  * We are ~100 times smaller then bitcoin now (2015-06-23), set minRelayTxFee only 10 times higher
@@ -1606,50 +1606,50 @@ double ConvertBitsToDouble(unsigned int nBits)
 }
 
 //TODO: CryptoDJ, Adjust block reward values
-int64_t GetBlockValue(int nHeight, bool fPoW)
+CAmount GetBlockValue(int nHeight, CAmount nFees, bool fProofOfStake)
 {
-    int64_t nSubsidy = 0;
+    CAmount nSubsidy = 0;
 
     if (Params().NetworkID() == CBaseChainParams::TESTNET) {
         if (nHeight < 200 && nHeight > 0)
         {
-            return 35000 * COIN;
+            return 35000 * COIN + nFees;
         }
         else
         {
-            return 350 * COIN;
+            return 350 * COIN + nFees;
         }
     }
 
-    if (fPoW) {
+    if (!fProofOfStake) {
         // This is a PoW block
         if (nHeight == 1) {
             //TODO: CryptoDJ, Adjust to total amount of old chain for swap.
             nSubsidy = 1750000 * COIN; //First block to payout swap for orginal chain Sling coin holders.
         }
-        else if (nHeight >= 200) {
-            nSubsidy = 7.35 * COIN;
-        }
-        else {
+        else if (nHeight > 1 && nHeight < 20) {
             nSubsidy = 0;
+        }
+        else if (nHeight >= 20) {
+            nSubsidy = 7.35 * COIN + nFees;
         }
     }
     else {
         // This is a PoS block
-        if (nHeight >= 1) {
-            nSubsidy = 0.35 * COIN; //First block to payout swap for orginal chain Sling coin holders.
-        }
-        else {
+        if (nHeight > 0 && nHeight < 20) {
             nSubsidy = 0;
+        }
+        else if (nHeight >= 20) {
+            nSubsidy = 0.35 * COIN + nFees;
         }
     }
     
     return nSubsidy;
 }
 
-int64_t GetMasternodePayment(int nHeight, int64_t blockValue, int nMasternodeCount)
+CAmount GetMasternodePayment(int nHeight, CAmount blockValue, int nMasternodeCount)
 {
-    int64_t ret = 0;
+    CAmount ret = 0;
 
     if (Params().NetworkID() == CBaseChainParams::TESTNET) {
         if (nHeight < 200)
@@ -1665,8 +1665,8 @@ int64_t GetMasternodePayment(int nHeight, int64_t blockValue, int nMasternodeCou
     } else if (nHeight <= Params().LAST_POW_BLOCK() && nHeight >= 151200) {
         ret = blockValue / 2;
     } else if (nHeight > Params().LAST_POW_BLOCK()) {
-        int64_t nMoneySupply = chainActive.Tip()->nMoneySupply;
-        int64_t mNodeCoins = mnodeman.size() * 10000 * COIN;
+        CAmount nMoneySupply = chainActive.Tip()->nMoneySupply;
+        CAmount mNodeCoins = mnodeman.size() * 10000 * COIN;
 
         //if a mn count is inserted into the function we are looking for a specific result for a masternode count
         if(nMasternodeCount)
@@ -2420,10 +2420,10 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     nTimeConnect += nTime1 - nTimeStart;
     LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime1 - nTimeStart), 0.001 * (nTime1 - nTimeStart) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime1 - nTimeStart) / (nInputs - 1), nTimeConnect * 0.000001);
 
-    if (!IsInitialBlockDownload() && !IsBlockValueValid(block, GetBlockValue(pindex->pprev->nHeight))) {
+    if (!IsInitialBlockDownload() && !IsBlockValueValid(block, GetBlockValue(pindex->pprev->nHeight + 1, nFees, block.IsProofOfStake()))) {
         return state.DoS(100,
             error("ConnectBlock() : reward pays too much (actual=%d vs limit=%d)",
-                block.vtx[0].GetValueOut(), GetBlockValue(pindex->pprev->nHeight)),
+                block.vtx[0].GetValueOut(), GetBlockValue(pindex->pprev->nHeight + 1, nFees, block.IsProofOfStake())),
             REJECT_INVALID, "bad-cb-amount");
     }
 

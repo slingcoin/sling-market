@@ -295,7 +295,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int64_t nFe
         }
     }
 
-    CAmount blockValue = GetBlockValue(pindexPrev->nHeight);
+    CAmount blockValue = GetBlockValue(pindexPrev->nHeight, nFees, fProofOfStake);
     CAmount masternodePayment = GetMasternodePayment(pindexPrev->nHeight, blockValue);
 
     if (hasPayment) {
@@ -508,8 +508,8 @@ bool CMasternodeBlockPayees::IsTransactionValid(const CTransaction& txNew)
 
     int nMaxSignatures = 0;
     std::string strPayeesPossible = "";
-
-    CAmount nReward = GetBlockValue(nBlockHeight);
+    //TODO: CryptoDJ, add nFees
+    CAmount nReward = GetBlockValue(nBlockHeight, 0, false);
 
     //account for the fact that all peers do not see the same masternode count. A allowance of being off our masternode count is given
     //we only need to look at an increased masternode count because as count increases, the reward decreases. This code only checks
