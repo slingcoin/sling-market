@@ -112,6 +112,13 @@ static const unsigned char REJECT_DUST = 0x41;
 static const unsigned char REJECT_INSUFFICIENTFEE = 0x42;
 static const unsigned char REJECT_CHECKPOINT = 0x43;
 
+static const CAmount STATIC_SWAP_BLOCK_AMOUNT = 1750000 * COIN; //TODO: CryptoDJ, Adjust to total amount of old chain for swap.
+static const CAmount STATIC_POS_PAYMENT_AMOUNT = 0.35 * COIN;
+static const CAmount STATIC_POW_PAYMENT_AMOUNT = 4 * COIN;
+static const CAmount STATIC_MASTERNODE_PAYMENT_AMOUNT = 3.5 * COIN;
+static const CAmount STATIC_MASTERNODE_COLLATERAL_AMOUNT = 735 * COIN;
+static const CAmount STATIC_MASTERNODE_BUDGET_AMOUNT = 1009 * COIN;
+
 struct BlockHasher {
     size_t operator()(const uint256& hash) const { return hash.GetLow64(); }
 };
@@ -227,10 +234,9 @@ bool DisconnectBlocksAndReprocess(int blocks);
 // ***TODO***
 double ConvertBitsToDouble(unsigned int nBits);
 int64_t GetMasternodePayment(int nHeight, int64_t blockValue, int nMasternodeCount = 0);
-unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, bool fProofOfStake);
 
 bool ActivateBestChain(CValidationState& state, CBlock* pblock = NULL);
-CAmount GetBlockValue(int nHeight, CAmount nFees, bool fPoW = true);
+CAmount GetBlockValue(int nHeight, CAmount nFees, bool fProofOfStake = false);
 
 /** Create a new block index entry for a given block hash */
 CBlockIndex* InsertBlockIndex(uint256 hash);
