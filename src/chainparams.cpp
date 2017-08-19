@@ -100,9 +100,11 @@ public:
         nRejectBlockOutdatedMajority = 950;
         nToCheckBlockUpgradeMajority = 1000;
         nMinerThreads = 0;
-        nTargetTimespan = 1 * 60; // Sling: 1 minute
-        nTargetSpacing = 1 * 60;  // Sling: 1 minute
-        nLastPOWBlock = std::numeric_limits<int>::max();
+        nTargetPoWSpacing = 7 * 60;  // Sling: 7 minutes
+        nTargetPoSTimespan = 67 * 40;  // Sling: not sure?
+        nTargetPoSSpacing = 67;   // Sling: 67 seconds
+        nStartMasternodePayments = 1501965300; //Sat, 2017-08-05 20:35:00 GMT
+        nFirstRewardBlock = 35; //TODO: CryptoDJ, increase to 3500
         nMaturity = 10; //TODO: CryptoDJ, increase to 100
         nMasternodeCountDrift = 20;
         nModifierUpdateBlock = 615800;
@@ -142,7 +144,6 @@ public:
         nPoolMaxTransactions = 3;
         strSporkKey = "048216a20abab9c0edb9a813328bbc4dad2082dda77c4b990bccbade46a8a331928c3a165aa4bd8ef1d8e1b9c9660da46dd6371eed67f92ec711d2e0cbfb13b47e";
         strCoinMixPoolDummyAddress = "ShAEbDNFkjjtTLykrGDJ36SU2Hwroxf3P6";
-        nStartMasternodePayments = 1501965300; //Sat, 2017-08-05 20:35:00 GMT
     }
 
     const Checkpoints::CCheckpointData& Checkpoints() const
@@ -173,10 +174,12 @@ public:
         nRejectBlockOutdatedMajority = 75;
         nToCheckBlockUpgradeMajority = 100;
         nMinerThreads = 0;
-        nTargetTimespan = 1 * 60; // Sling: 1 minute
-        nTargetSpacing = 1 * 60;  // Sling: 1 minute
-        nLastPOWBlock = std::numeric_limits<int>::max();
-        nMaturity = 15;
+        nTargetPoWSpacing = 5 * 60;  // Sling: 5 minutes
+        nTargetPoSTimespan = 35 * 40;  // Sling: not sure?
+        nTargetPoSSpacing = 35;   // Sling: 35 seconds
+        nStartMasternodePayments = 1501965300; //Sat, 2017-08-05 20:35:00 GMT
+        nFirstRewardBlock = 15;
+        nMaturity = 10;
         nModifierUpdateBlock = 51197; //approx Mon, 17 Apr 2017 04:00:00 GMT
         startNewChain = false;
 
@@ -213,7 +216,6 @@ public:
 
         nPoolMaxTransactions = 2;
         strSporkKey = "048216a20abab9c0edb9a813328bbc4dad2082dda77c4b990bccbade46a8a331928c3a165aa4bd8ef1d8e1b9c9660da46dd6371eed67f92ec711d2e0cbfb13b47e";
-        nStartMasternodePayments = 1501965300; //Sat, 2017-08-05 20:35:00 GMT
     }
     const Checkpoints::CCheckpointData& Checkpoints() const
     {
@@ -242,9 +244,11 @@ public:
         nRejectBlockOutdatedMajority = 950;
         nToCheckBlockUpgradeMajority = 1000;
         nMinerThreads = 1;
-        nTargetTimespan = 24 * 60 * 60; // Sling: 1 day
-        nTargetSpacing = 1 * 60;        // Sling: 1 minutes
+        nTargetPoWSpacing = 3 * 60;  // Sling: 3 minutes
+        nTargetPoSTimespan = 15 * 40;  // Sling: not sure?
+        nTargetPoSSpacing = 35;   // Sling: 35 seconds
         bnProofOfWorkLimit = ~uint256(0) >> 1;
+        nFirstRewardBlock = 10;
         genesis.nTime = 1454124731;
         genesis.nBits = 0x207fffff;
         genesis.nNonce = 12345;

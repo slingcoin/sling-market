@@ -70,10 +70,11 @@ public:
     bool SkipProofOfWorkCheck() const { return fSkipProofOfWorkCheck; }
     /** Make standard checks */
     bool RequireStandard() const { return fRequireStandard; }
-    int64_t TargetTimespan() const { return nTargetTimespan; }
-    int64_t TargetSpacing() const { return nTargetSpacing; }
-    int64_t Interval() const { return nTargetTimespan / nTargetSpacing; }
-    int LAST_POW_BLOCK() const { return nLastPOWBlock; }
+    int64_t TargetPoWSpacing() const { return nTargetPoWSpacing; }
+    int64_t TargetPoSTimespan() const { return nTargetPoSTimespan; }
+    int64_t TargetPoSSpacing() const { return nTargetPoSSpacing; }
+    int64_t Interval() const { return nTargetPoSTimespan / nTargetPoSSpacing; }
+    int FirstRewardBlock() const { return nFirstRewardBlock; }
     int COINBASE_MATURITY() const { return nMaturity; }
     int ModifierUpgradeBlock() const { return nModifierUpdateBlock; }
     /** The masternode count that we will allow the see-saw reward payments to be off by */
@@ -108,9 +109,10 @@ protected:
     int nEnforceBlockUpgradeMajority;
     int nRejectBlockOutdatedMajority;
     int nToCheckBlockUpgradeMajority;
-    int64_t nTargetTimespan;
-    int64_t nTargetSpacing;
-    int nLastPOWBlock;
+    int64_t nTargetPoWSpacing;
+    int64_t nTargetPoSTimespan;
+    int64_t nTargetPoSSpacing;
+    int nFirstRewardBlock;
     int nMasternodeCountDrift;
     int nMaturity;
     int nModifierUpdateBlock;

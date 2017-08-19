@@ -543,8 +543,8 @@ Value getblocktemplate(const Array& params, bool fHelp)
     }
     CBlock* pblock = &pblocktemplate->block; // pointer for convenience
 
-    // Update nTime
-    UpdateTime(pblock, pindexPrev);
+    // Update nTime, PoW block
+    UpdateTime(pblock, pindexPrev, false);
     pblock->nNonce = 0;
 
     static const Array aCaps = boost::assign::list_of("proposal");

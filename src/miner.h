@@ -29,7 +29,7 @@ CBlockTemplate* CreateNewBlockWithKey(CReserveKey& reservekey, CWallet* pwallet,
 void IncrementExtraNonce(CBlock* pblock, CBlockIndex* pindexPrev, unsigned int& nExtraNonce);
 void IncrementExtraNonce(CBlock* pblock, unsigned int nHeight, unsigned int& nExtraNonce);
 /** Check mined block */
-void UpdateTime(CBlockHeader* block, const CBlockIndex* pindexPrev);
+void UpdateTime(CBlockHeader* block, const CBlockIndex* pindexPrev, bool fProofOfStake = false);
 
 void BitcoinMiner(CWallet* pwallet, bool fProofOfStake = false);
 

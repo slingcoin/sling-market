@@ -24,6 +24,7 @@ using namespace boost;
     Don't ever reuse these IDs for other sporks
     - This would result in old clients getting confused about which spork is for what
 */
+//TODO: CryptoDj, change sporks for Sling.
 #define SPORK_START 10001
 #define SPORK_END 10013
 
