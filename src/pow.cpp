@@ -1,5 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
+// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2015-2017 The Sling developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -17,24 +19,19 @@
 
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, bool IsProofOfStake)
 {
-    /* current difficulty formula, sling - DarkGravity v3, written by Evan Duffield - evan@dashpay.io */
     const CBlockIndex* BlockLastSolved = pindexLast;
     const CBlockIndex* BlockReading = pindexLast;
     int64_t nActualTimespan = 0;
     int64_t LastBlockTime = 0;
-    int64_t PastBlocksMin = 10;
-    int64_t PastBlocksMax = 10;
+    int64_t PastBlocksMin = 24;
+    int64_t PastBlocksMax = 24;
     int64_t CountBlocks = 0;
     uint256 PastDifficultyAverage;
     uint256 PastDifficultyAveragePrev;
 
-    if (BlockLastSolved == NULL || BlockLastSolved->nHeight == 0 || BlockLastSolved->nHeight < PastBlocksMin) {
-        return Params().ProofOfWorkLimit().GetCompact();
-    }
-
     if (IsProofOfStake) {
-        // This is a PoS Block
-        //TODO: CryptoDJ, this is a PoS block
+        LogPrintf("GetNextWorkRequired: IsProofOfStake\n");
+        // This is a PoS Block, calculate difficulty differently than PoW block
         uint256 bnTargetLimit = (~uint256(0) >> 24);
         int64_t nTargetTimespan = Params().TargetPoSTimespan();
         int64_t nTargetSpacing = Params().TargetPoSSpacing();
@@ -63,32 +60,45 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     else
     {
         // This is a PoW Block
-        for (unsigned int i = 1; BlockReading && BlockReading->nHeight > 0; i++) {
-            if (PastBlocksMax > 0 && i > PastBlocksMax) {
-                break;
-            }
-            CountBlocks++;
-
-            if (CountBlocks <= PastBlocksMin) {
-                if (CountBlocks == 1) {
-                    PastDifficultyAverage.SetCompact(BlockReading->nBits);
-                } else {
-                    PastDifficultyAverage = ((PastDifficultyAveragePrev * CountBlocks) + (uint256().SetCompact(BlockReading->nBits))) / (CountBlocks + 1);
+        // Current difficulty formula, Sling - DarkGravityWave v3, written by Evan Duffield - evan@dashpay.io
+        if (BlockLastSolved == NULL || BlockLastSolved->nHeight == 0 || BlockLastSolved->nHeight < PastBlocksMin) {
+            return Params().ProofOfWorkLimit().GetCompact();
+        }
+        unsigned int i = 1;
+        while (true) {
+            if (BlockReading->IsProofOfWork()) {
+                // Only use Proof-of-Work Blocks
+                if (PastBlocksMax > 0 && i > PastBlocksMax) {
+                    break;
                 }
-                PastDifficultyAveragePrev = PastDifficultyAverage;
-            }
+                if (BlockReading->nHeight == 0) {
+                    break;
+                }
 
-            if (LastBlockTime > 0) {
-                int64_t Diff = (LastBlockTime - BlockReading->GetBlockTime());
-                nActualTimespan += Diff;
-            }
-            LastBlockTime = BlockReading->GetBlockTime();
+                CountBlocks++;
 
-            if (BlockReading->pprev == NULL) {
-                assert(BlockReading);
-                break;
+                if (CountBlocks <= PastBlocksMin) {
+                    if (CountBlocks == 1) {
+                        PastDifficultyAverage.SetCompact(BlockReading->nBits);
+                    } else {
+                        PastDifficultyAverage = ((PastDifficultyAveragePrev * CountBlocks) + (uint256().SetCompact(BlockReading->nBits))) / (CountBlocks + 1);
+                    }
+                    PastDifficultyAveragePrev = PastDifficultyAverage;
+                }
+
+                if (LastBlockTime > 0) {
+                    int64_t Diff = (LastBlockTime - BlockReading->GetBlockTime());
+                    nActualTimespan += Diff;
+                }
+                LastBlockTime = BlockReading->GetBlockTime();
+
+                if (BlockReading->pprev == NULL) {
+                    assert(BlockReading);
+                    break;
+                }
             }
             BlockReading = BlockReading->pprev;
+            i ++;
         }
 
         uint256 bnNew(PastDifficultyAverage);

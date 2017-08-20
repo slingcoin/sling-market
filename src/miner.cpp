@@ -95,7 +95,7 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn, CWallet* pwallet, 
     CReserveKey reservekey(pwallet);
 
     // Create new block
-    auto_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
+    std::unique_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
     if (!pblocktemplate.get())
         return NULL;
     CBlock* pblock = &pblocktemplate->block; // pointer for convenience
@@ -441,10 +441,16 @@ CBlockTemplate* CreateNewBlockWithKey(CReserveKey& reservekey, CWallet* pwallet,
     return CreateNewBlock(scriptPubKey, pwallet, fProofOfStake);
 }
 
-bool ProcessBlockFound(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey)
+static bool ProcessBlockFound(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey, bool fProofOfStake)
 {
     LogPrintf("%s\n", pblock->ToString());
-    LogPrintf("generated %s\n", FormatMoney(pblock->vtx[0].vout[0].nValue));
+    if (fProofOfStake)
+    {
+        LogPrintf("generated %s\n", FormatMoney(pblock->vtx[1].vout[0].nValue));
+    }
+    else {
+        LogPrintf("generated %s\n", FormatMoney(pblock->vtx[0].vout[0].nValue));
+    }
 
     // Found a solution
     {
@@ -464,7 +470,7 @@ bool ProcessBlockFound(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey)
 
     // Process this block the same as if we had received it from another node
     CValidationState state;
-    if (!ProcessNewBlock(state, NULL, pblock))
+    if (!ProcessNewBlock(state, NULL, pblock, NULL, fProofOfStake))
         return error("SlingMiner : ProcessNewBlock, block not accepted");
 
     return true;
@@ -476,19 +482,18 @@ bool fGenerateBitcoins = false;
 
 void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
 {
-    if (fProofOfStake)
-    {
-        LogPrintf("SlingMinter started\n");
-        SetThreadPriority(THREAD_PRIORITY_LOWEST);
-        RenameThread("sling-minter");
+    std::string strMinerType = "";
+    if (fProofOfStake) {
+        strMinerType = "Proof-of-Stake";
+        RenameThread("sling-pos-minter");
     }
-    else
-    {
-        LogPrintf("SlingMiner started\n");
-        SetThreadPriority(THREAD_PRIORITY_LOWEST);
-        RenameThread("sling-miner");
+    else {
+        strMinerType = "Proof-of-Work";
+        RenameThread("sling-pow-miner");
     }
-    
+    SetThreadPriority(THREAD_PRIORITY_LOWEST);
+    LogPrintf("Sling %s Miner started.\n", strMinerType);
+
     // Each thread has its own key and counter
     CReserveKey reservekey(pwallet);
     unsigned int nExtraNonce = 0;
@@ -505,11 +510,13 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
 
     while (fGenerateBitcoins || fProofOfStake) {
         if (fProofOfStake) {
-            while (vNodes.empty() || pwallet->IsLocked() || !fMintableCoins || nReserveBalance >= pwallet->GetBalance() || !masternodeSync.IsSynced()) {
+            while (pwallet->IsLocked() || !fMintableCoins || nReserveBalance >= pwallet->GetBalance()) {
                 nLastCoinStakeSearchInterval = 0;
                 MilliSleep(5000);
-                if (!fGenerateBitcoins && !fProofOfStake)
+                if (!fGenerateBitcoins && !fProofOfStake) {
                     continue;
+                }
+                fMintableCoins = pwallet->MintableCoins();
             }
 
             if (mapHashedBlocks.count(chainActive.Tip()->nHeight)) //search our map of hashed blocks, see if bestblock has been hashed yet
@@ -521,9 +528,8 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
                 }
             }
         }
-        
-        // LogPrintf("Sling PoW Miner Running. Good luck!\n");
 
+        
         while (true) {
             unsigned int nHashesDone = 0;
             
@@ -542,6 +548,7 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
                 } while (true);
             }
 
+            //LogPrintf("Sling %s Miner Running. Good luck and godspeed!\n", strMinerType);
             //
             // Create new block
             //
@@ -550,7 +557,7 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
             if (!pindexPrev)
                 continue;
 
-            auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlockWithKey(reservekey, pwallet, fProofOfStake));
+            std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlockWithKey(reservekey, pwallet, fProofOfStake));
             if (!pblocktemplate.get())
                 continue;
 
@@ -571,7 +578,7 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
 
                 LogPrintf("CPUMiner : proof-of-stake block was signed %s \n", pblock->GetHash().ToString().c_str());
                 SetThreadPriority(THREAD_PRIORITY_NORMAL);
-                ProcessBlockFound(pblock, *pwallet, reservekey);
+                ProcessBlockFound(pblock, *pwallet, reservekey, fProofOfStake);
                 SetThreadPriority(THREAD_PRIORITY_LOWEST);
 
                 continue;
@@ -594,7 +601,7 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
                     SetThreadPriority(THREAD_PRIORITY_NORMAL);
                     LogPrintf("BitcoinMiner:\n");
                     LogPrintf("proof-of-work found  \n  hash: %s  \ntarget: %s\n", hash.GetHex(), hashTarget.GetHex());
-                    ProcessBlockFound(pblock, *pwallet, reservekey);
+                    ProcessBlockFound(pblock, *pwallet, reservekey, fProofOfStake);
                     SetThreadPriority(THREAD_PRIORITY_LOWEST);
 
                     // In regression test mode, stop mining after a block is found. This
