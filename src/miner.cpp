@@ -583,7 +583,7 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
 
                 continue;
             }
-
+          
             //TODO: CryptoDJ, put this back?
             //LogPrintf("Running SlingMiner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
             //    ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
