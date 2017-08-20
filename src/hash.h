@@ -262,8 +262,8 @@ void BIP32Hash(const unsigned char chainCode[32], unsigned int nChild, unsigned 
 /// Associated data: None
 /// Associated data length: 0
 /// Memory cost: 250 kibibytes
-/// Lanes: 4 parallel threads
-/// Threads: 2 threads
+/// Lanes: 2 parallel threads
+/// Threads: 1 thread
 /// Time Constraint: 1 iteration
 
 inline int Argon2d_Phase1_Hash(const void *in, const size_t size, const void *out) {
@@ -282,8 +282,8 @@ inline int Argon2d_Phase1_Hash(const void *in, const size_t size, const void *ou
     context.free_cbk = NULL;
     context.flags = DEFAULT_ARGON2_FLAG; // = ARGON2_DEFAULT_FLAGS
     // main configurable Argon2 hash parameters
-    context.m_cost = 250; // Memory in KiB (~256KB)
-    context.lanes = 4;    // Degree of Parallelism
+    context.m_cost = 250; // Memory in KiB (~256 KB)
+    context.lanes = 2;    // Degree of Parallelism
     context.threads = 1;  // Threads
     context.t_cost = 1;   // Iterations
 
@@ -312,8 +312,8 @@ inline int Argon2d_Phase1_Hash_Ctx(const void *in, void *Matrix, void *out) {
 /// Associated data: None
 /// Associated data length: 0
 /// Memory cost: 1000 kibibytes
-/// Lanes: 64 parallel threads
-/// Threads: 4 threads
+/// Lanes: 32 parallel threads
+/// Threads: 1 thread
 /// Time Constraint: 8 iterations
 inline int Argon2d_Phase2_Hash(const void *in, const size_t size, void *out) {
     argon2_context context;
@@ -331,10 +331,10 @@ inline int Argon2d_Phase2_Hash(const void *in, const size_t size, void *out) {
     context.free_cbk = NULL;
     context.flags = DEFAULT_ARGON2_FLAG; // = ARGON2_DEFAULT_FLAGS
     // main configurable Argon2 hash parameters
-    context.m_cost = 250; // Memory in KiB (~250KB)
-    context.lanes = 64;    // Degree of Parallelism
-    context.threads = 2;  // Threads
-    context.t_cost = 1;    // Iterations
+    context.m_cost = 500; // Memory in KiB (~512 KB)
+    context.lanes = 32;    // Degree of Parallelism
+    context.threads = 1;  // Threads
+    context.t_cost = 8;    // Iterations
     
     return argon2_ctx(&context, Argon2_d);
 }

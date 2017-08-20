@@ -1475,9 +1475,15 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
                     (!IsLockedCoin((*it).first, i) || nCoinType == ONLY_10000) &&
                     (pcoin->vout[i].nValue > 0 || fIncludeZeroValue) &&
                     (!coinControl || !coinControl->HasSelected() || coinControl->fAllowOtherInputs || coinControl->IsSelected((*it).first, i)))
+                {
                     vCoins.push_back(COutput(pcoin, i, nDepth,
                         ((mine & ISMINE_SPENDABLE) != ISMINE_NO) ||
                             (coinControl && coinControl->fAllowWatchOnly && (mine & ISMINE_WATCH_SOLVABLE) != ISMINE_NO)));
+                    //LogPrintf("CWallet::AvailableCoins, Add vout. \n");
+                }
+                else {
+                    //LogPrintf("CWallet::AvailableCoins, Did not add vout. \n");
+                }
             }
         }
     }
@@ -2435,7 +2441,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
             CAmount nTotalSize = pcoin.first->vout[pcoin.second].nValue + GetBlockValue(pIndex0->nHeight, 0, true);
 
             //presstab HyperStake - if MultiSend is set to send in coinstake we will add our outputs here (values asigned further down)
-            if (nTotalSize / 2 > nStakeSplitThreshold * COIN)
+            if ((CAmount)(nTotalSize / 2) > (CAmount)(nStakeSplitThreshold * COIN))
                 txNew.vout.push_back(CTxOut(0, scriptPubKeyOut)); //split stake
 
             if (fDebug && GetBoolArg("-printcoinstake", false))

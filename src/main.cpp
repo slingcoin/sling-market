@@ -68,7 +68,7 @@ bool fCheckBlockIndex = false;
 unsigned int nCoinCacheSize = 5000;
 bool fAlerts = DEFAULT_ALERTS;
 
-unsigned int nStakeMinAge = 60 * 60;
+unsigned int nStakeMinAge = MINIMUM_STAKE_AGE;
 CAmount nReserveBalance = 0;
 
 /** Fees smaller than this (in duffs) are considered zero fee (for relaying and mining)
@@ -3182,9 +3182,9 @@ bool CheckWork(const CBlock block, CBlockIndex* const pindexPrev)
     if (pindexPrev == NULL)
         return error("%s : null pindexPrev for block %s", __func__, block.GetHash().ToString().c_str());
 
-    LogPrintf("CheckWork: block.IsProofOfStake() = %d\n", block.IsProofOfStake());
+    //LogPrintf("CheckWork: block.IsProofOfStake() = %d\n", block.IsProofOfStake());
     unsigned int nBitsRequired = GetNextWorkRequired(pindexPrev, &block, block.IsProofOfStake());
-    LogPrintf("CheckWork: nBitsRequired = %u\n", nBitsRequired);
+    //LogPrintf("CheckWork: nBitsRequired = %u\n", nBitsRequired);
     if (block.IsProofOfWork()) {
         double n1 = ConvertBitsToDouble(block.nBits);
         double n2 = ConvertBitsToDouble(nBitsRequired);

@@ -23,14 +23,14 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     const CBlockIndex* BlockReading = pindexLast;
     int64_t nActualTimespan = 0;
     int64_t LastBlockTime = 0;
-    int64_t PastBlocksMin = 24;
-    int64_t PastBlocksMax = 24;
+    int64_t PastBlocksMin = 24; //TODO: CryptoDJ, Increase to 24
+    int64_t PastBlocksMax = 24; //TODO: CryptoDJ, Increase to 24
     int64_t CountBlocks = 0;
     uint256 PastDifficultyAverage;
     uint256 PastDifficultyAveragePrev;
 
     if (IsProofOfStake) {
-        LogPrintf("GetNextWorkRequired: IsProofOfStake\n");
+        //LogPrintf("GetNextWorkRequired: IsProofOfStake\n");
         // This is a PoS Block, calculate difficulty differently than PoW block
         uint256 bnTargetLimit = (~uint256(0) >> 24);
         int64_t nTargetTimespan = Params().TargetPoSTimespan();
@@ -64,11 +64,11 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         if (BlockLastSolved == NULL || BlockLastSolved->nHeight == 0 || BlockLastSolved->nHeight < PastBlocksMin) {
             return Params().ProofOfWorkLimit().GetCompact();
         }
-        unsigned int i = 1;
+        unsigned int nCurrentPoWBlockCount = 1;
         while (true) {
             if (BlockReading->IsProofOfWork()) {
                 // Only use Proof-of-Work Blocks
-                if (PastBlocksMax > 0 && i > PastBlocksMax) {
+                if (PastBlocksMax > 0 && nCurrentPoWBlockCount > PastBlocksMax) {
                     break;
                 }
                 if (BlockReading->nHeight == 0) {
@@ -96,14 +96,19 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
                     assert(BlockReading);
                     break;
                 }
+                //LogPrintf("GetNextWorkRequired: Used PoW nHeight = %d, LastBlockTime = %d, nActualTimespan = %d\n", BlockReading->nHeight, LastBlockTime, nActualTimespan);
+                nCurrentPoWBlockCount ++;
             }
+            //else
+            //    LogPrintf("GetNextWorkRequired: Skipped PoS block number %d\n", BlockReading->nHeight);
+
             BlockReading = BlockReading->pprev;
-            i ++;
         }
 
         uint256 bnNew(PastDifficultyAverage);
 
         int64_t _nTargetTimespan = CountBlocks * Params().TargetPoWSpacing();
+        //LogPrintf("GetNextWorkRequired: _nTargetTimespan = %d, nActualTimespan = %d\n", _nTargetTimespan, nActualTimespan);
 
         if (nActualTimespan < _nTargetTimespan / 3)
             nActualTimespan = _nTargetTimespan / 3;
@@ -117,6 +122,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         if (bnNew > Params().ProofOfWorkLimit()) {
             bnNew = Params().ProofOfWorkLimit();
         }
+        //LogPrintf("GetNextWorkRequired: bnNew = %s, Difficulty = %u\n", bnNew.ToString().c_str(), bnNew.GetCompact());
         return bnNew.GetCompact();
     }
 }
