@@ -75,6 +75,7 @@ public:
     int64_t TargetPoSSpacing() const { return nTargetPoSSpacing; }
     int64_t Interval() const { return nTargetPoSTimespan / nTargetPoSSpacing; }
     int FirstRewardBlock() const { return nFirstRewardBlock; }
+    int FirstPoSBlock() const { return nFirstPoSBlock; }
     int COINBASE_MATURITY() const { return nMaturity; }
     int ModifierUpgradeBlock() const { return nModifierUpdateBlock; }
     /** The masternode count that we will allow the see-saw reward payments to be off by */
@@ -113,6 +114,7 @@ protected:
     int64_t nTargetPoSTimespan;
     int64_t nTargetPoSSpacing;
     int nFirstRewardBlock;
+    int nFirstPoSBlock;
     int nMasternodeCountDrift;
     int nMaturity;
     int nModifierUpdateBlock;
