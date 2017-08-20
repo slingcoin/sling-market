@@ -3048,8 +3048,10 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool f
 
 bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig)
 {
+    if (block.IsProofOfStake()) {
+        fCheckPOW = false;
+    }
     // These are checks that are independent of context.
-
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
     if (!CheckBlockHeader(block, state, fCheckPOW))
@@ -3180,9 +3182,10 @@ bool CheckWork(const CBlock block, CBlockIndex* const pindexPrev)
     if (pindexPrev == NULL)
         return error("%s : null pindexPrev for block %s", __func__, block.GetHash().ToString().c_str());
 
+    LogPrintf("CheckWork: block.IsProofOfStake() = %d\n", block.IsProofOfStake());
     unsigned int nBitsRequired = GetNextWorkRequired(pindexPrev, &block, block.IsProofOfStake());
-
-    if (block.IsProofOfWork() && (pindexPrev->nHeight + 1 <= 68589)) {
+    LogPrintf("CheckWork: nBitsRequired = %u\n", nBitsRequired);
+    if (block.IsProofOfWork()) {
         double n1 = ConvertBitsToDouble(block.nBits);
         double n2 = ConvertBitsToDouble(nBitsRequired);
 
@@ -3449,21 +3452,28 @@ void CBlockIndex::BuildSkip()
         pskip = pprev->GetAncestor(GetSkipHeight(nHeight));
 }
 
-bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDiskBlockPos* dbp)
+bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDiskBlockPos* dbp, bool fProofOfStake)
 {
+    if (fProofOfStake)
+        LogPrintf("%s : Proof-of-Stake Started\n", __func__);
+
     // Preliminary checks
     bool checked = CheckBlock(*pblock, state);
 
+    if (fProofOfStake)
+        LogPrintf("%s : Proof-of-Stake CheckBlock completed\n", __func__);
     // ppcoin: check proof-of-stake
     // Limited duplicity on stake: prevents block flood attack
     // Duplicate stake allowed only when there is orphan child block
     //if (pblock->IsProofOfStake() && setStakeSeen.count(pblock->GetProofOfStake())/* && !mapOrphanBlocksByPrev.count(hash)*/)
     //    return error("ProcessNewBlock() : duplicate proof-of-stake (%s, %d) for block %s", pblock->GetProofOfStake().first.ToString().c_str(), pblock->GetProofOfStake().second, pblock->GetHash().ToString().c_str());
 
-    // NovaCoin: check proof-of-stake block signature
-    if (!pblock->CheckBlockSignature())
-        return error("ProcessNewBlock() : bad proof-of-stake block signature");
-
+    if (fProofOfStake) {
+        // NovaCoin: check proof-of-stake block signature
+        if (!pblock->CheckBlockSignature())
+            return error("ProcessNewBlock() : bad proof-of-stake block signature"); 
+    }
+    
     if (pblock->GetHash() != Params().HashGenesisBlock() && pfrom != NULL) {
         //if we get this far, check if the prev block is our prev block, if not then request sync and return false
         BlockMap::iterator mi = mapBlockIndex.find(pblock->hashPrevBlock);
@@ -3752,7 +3762,7 @@ bool static LoadBlockIndexDB()
         //Process the lastMetaBlock again, using the known location on disk
         CDiskBlockPos blockPos = pindexLastMeta->GetBlockPos();
         CValidationState state;
-        ProcessNewBlock(state, NULL, &lastMetaBlock, &blockPos);
+        ProcessNewBlock(state, NULL, &lastMetaBlock, &blockPos, lastMetaBlock.IsProofOfStake());
 
         //ensure that everything is as it should be
         if (pcoinsTip->GetBestBlock() != vSortedByHeight[vSortedByHeight.size() - 1].second->GetBlockHash()) {
@@ -4021,7 +4031,7 @@ bool LoadExternalBlockFile(FILE* fileIn, CDiskBlockPos* dbp)
                 // process in case the block isn't known yet
                 if (mapBlockIndex.count(hash) == 0 || (mapBlockIndex[hash]->nStatus & BLOCK_HAVE_DATA) == 0) {
                     CValidationState state;
-                    if (ProcessNewBlock(state, NULL, &block, dbp))
+                    if (ProcessNewBlock(state, NULL, &block, dbp, block.IsProofOfStake()))
                         nLoaded++;
                     if (state.IsError())
                         break;
@@ -4042,7 +4052,7 @@ bool LoadExternalBlockFile(FILE* fileIn, CDiskBlockPos* dbp)
                             LogPrintf("%s: Processing out of order child %s of %s\n", __func__, block.GetHash().ToString(),
                                 head.ToString());
                             CValidationState dummy;
-                            if (ProcessNewBlock(dummy, NULL, &block, &it->second)) {
+                            if (ProcessNewBlock(dummy, NULL, &block, &it->second, block.IsProofOfStake())) {
                                 nLoaded++;
                                 queue.push_back(block.GetHash());
                             }
@@ -5126,7 +5136,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             pfrom->AddInventoryKnown(inv);
 
             CValidationState state;
-            ProcessNewBlock(state, pfrom, &block);
+            ProcessNewBlock(state, pfrom, &block, NULL, block.IsProofOfStake());
             int nDoS;
             if (state.IsInvalid(nDoS)) {
                 pfrom->PushMessage("reject", strCommand, state.GetRejectCode(),
@@ -5137,7 +5147,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 }
             }
         }
-
     }
 
 

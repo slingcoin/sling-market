@@ -33,6 +33,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     }
 
     if (IsProofOfStake) {
+        LogPrintf("GetNextWorkRequired: IsProofOfStake\n");
         // This is a PoS Block
         //TODO: CryptoDJ, this is a PoS block
         uint256 bnTargetLimit = (~uint256(0) >> 24);
