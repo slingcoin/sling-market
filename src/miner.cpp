@@ -504,7 +504,6 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
 
     if (fProofOfStake && (GetTime() - nMintableLastCheck > 5 * 60)) // 5 minute check time
     {
-        LogPrintf("Sling PoS Miner 5 minute check time\n");
         nMintableLastCheck = GetTime();
         fMintableCoins = pwallet->MintableCoins();
     }
@@ -514,8 +513,10 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
             while (pwallet->IsLocked() || !fMintableCoins || nReserveBalance >= pwallet->GetBalance()) {
                 nLastCoinStakeSearchInterval = 0;
                 MilliSleep(5000);
-                if (!fGenerateBitcoins && !fProofOfStake)
+                if (!fGenerateBitcoins && !fProofOfStake) {
                     continue;
+                }
+                fMintableCoins = pwallet->MintableCoins();
             }
 
             if (mapHashedBlocks.count(chainActive.Tip()->nHeight)) //search our map of hashed blocks, see if bestblock has been hashed yet

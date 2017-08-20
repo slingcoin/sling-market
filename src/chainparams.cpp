@@ -105,6 +105,7 @@ public:
         nTargetPoSSpacing = 67;   // Sling: 67 seconds
         nStartMasternodePayments = 1501965300; //Sat, 2017-08-05 20:35:00 GMT
         nFirstRewardBlock = 35; //TODO: CryptoDJ, increase to 3500
+        nFirstPoSBlock = 11; //TODO: CryptoDJ, increase to 35000
         nMaturity = 10; //TODO: CryptoDJ, increase to 100
         nMasternodeCountDrift = 20;
         nModifierUpdateBlock = 615800;
@@ -177,8 +178,9 @@ public:
         nTargetPoWSpacing = 5 * 60;  // Sling: 5 minutes
         nTargetPoSTimespan = 35 * 40;  // Sling: not sure?
         nTargetPoSSpacing = 35;   // Sling: 35 seconds
-        nStartMasternodePayments = 1501965300; //Sat, 2017-08-05 20:35:00 GMT
+        nStartMasternodePayments = 1501965335; //Sat, 2017-08-05 20:35:35 GMT
         nFirstRewardBlock = 15;
+        nFirstPoSBlock = 11;
         nMaturity = 10;
         nModifierUpdateBlock = 51197; //approx Mon, 17 Apr 2017 04:00:00 GMT
         startNewChain = false;
