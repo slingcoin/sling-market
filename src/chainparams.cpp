@@ -94,16 +94,25 @@ public:
         vAlertPubKey = ParseHex("048216a20abab9c0edb9a813328bbc4dad2082dda77c4b990bccbade46a8a331928c3a165aa4bd8ef1d8e1b9c9660da46dd6371eed67f92ec711d2e0cbfb13b47e");
         nDefaultPort = 31135;
         //bnProofOfWorkLimit = ~uint256(0) >> 20; // Sling starting difficulty is 1 / 2^20
-        bnProofOfWorkLimit = uint256S("0000fffff0000000000000000000000000000000000000000000000000000000");
+        bnProofOfWorkLimit = uint256S("000007fff0000000000000000000000000000000000000000000000000000000");
         nSubsidyHalvingInterval = 210000;
         nMaxReorganizationDepth = 100;
         nEnforceBlockUpgradeMajority = 750;
         nRejectBlockOutdatedMajority = 950;
         nToCheckBlockUpgradeMajority = 1000;
+
         nMinerThreads = 0;
-        nTargetPoWSpacing = 5 * 60;  // Sling: 5 minutes //TODO: CryptoDJ, increase to 7 minutes
-        nTargetPoSTimespan = 67 * 40;  // Sling: not sure?
-        nTargetPoSSpacing = 139;   // Sling: 139 seconds
+        // PoW
+        nPoWAveragingWindow = 17;
+        //assert(maxUint/bnProofOfWorkLimit >= nPowAveragingWindow);
+        nPoWMaxAdjustDown = 32; // 32% adjustment down
+        nPoWMaxAdjustUp = 16; // 16% adjustment up
+        nPoWTargetSpacing = 2.5 * 60; // Sling: 2.5 minutes //TODO: CryptoDJ, increase to 7 minutes
+
+        nPoSTargetTimespan = 67 * 40;  // Sling: not sure?
+        nPoSTargetSpacing = 139;   // Sling: 139 seconds
+
+
         nStartMasternodePayments = 1501965300; //Sat, 2017-08-05 20:35:00 GMT
         nFirstRewardBlock = 10; //TODO: CryptoDJ, increase to 3500
         nFirstPoSBlock = 10; //TODO: CryptoDJ, increase to 35000
@@ -112,13 +121,13 @@ public:
         nModifierUpdateBlock = 615800; //TODO: CryptoDJ, remove this parameters.
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1503255997, 28323, Convert_UintToArith256_GetCompact(bnProofOfWorkLimit), 1, (7.35 * COIN));
+        genesis = CreateGenesisBlock(1504554234, 486241, Convert_UintToArith256_GetCompact(bnProofOfWorkLimit), 1, (7.35 * COIN));
         if(startNewChain == true) {
             MineGenesis(genesis, bnProofOfWorkLimit, true);
         }
 
         hashGenesisBlock = genesis.GetHash();
-        assert(hashGenesisBlock == uint256("0x00006e1a45d8bf5547bd6739ca11979c1adce6be4a503510a0c9abb8d650d510"));
+        assert(hashGenesisBlock == uint256("0x000001c0416b896d41bcea146e7f790dfd7f0172b56537f213fb4ad807735c9e"));
         assert(genesis.hashMerkleRoot == uint256("0xf293f656ff77eec4907e62a2d68ccc4e31fe9dc6d12b5846f3ef33268abb3a3b"));
 
         vSeeds.push_back(CDNSSeedData("slingmarket.net", "seed.slingmarket.net"));     // Primary DNS Seeder from slingmarket.net
@@ -176,9 +185,9 @@ public:
         nRejectBlockOutdatedMajority = 75;
         nToCheckBlockUpgradeMajority = 100;
         nMinerThreads = 0;
-        nTargetPoWSpacing = 5 * 60;  // Sling: 5 minutes
-        nTargetPoSTimespan = 35 * 40;  // Sling: not sure?
-        nTargetPoSSpacing = 35;   // Sling: 35 seconds
+        nPoWTargetSpacing = 5 * 60;  // Sling: 5 minutes
+        nPoSTargetTimespan = 35 * 40;  // Sling: not sure?
+        nPoSTargetSpacing = 35;   // Sling: 35 seconds
         nStartMasternodePayments = 1501965335; //Sat, 2017-08-05 20:35:35 GMT
         nFirstRewardBlock = 15;
         nFirstPoSBlock = 11;
@@ -247,9 +256,9 @@ public:
         nRejectBlockOutdatedMajority = 950;
         nToCheckBlockUpgradeMajority = 1000;
         nMinerThreads = 1;
-        nTargetPoWSpacing = 3 * 60;  // Sling: 3 minutes
-        nTargetPoSTimespan = 15 * 40;  // Sling: not sure?
-        nTargetPoSSpacing = 35;   // Sling: 35 seconds
+        nPoWTargetSpacing = 3 * 60;  // Sling: 3 minutes
+        nPoSTargetTimespan = 15 * 40;  // Sling: not sure?
+        nPoSTargetSpacing = 35;   // Sling: 35 seconds
         bnProofOfWorkLimit = ~uint256(0) >> 1;
         nFirstRewardBlock = 10;
         genesis.nTime = 1503221235;

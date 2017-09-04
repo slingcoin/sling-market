@@ -46,7 +46,7 @@ public:
     const MessageStartChars& MessageStart() const { return pchMessageStart; }
     const std::vector<unsigned char>& AlertKey() const { return vAlertPubKey; }
     int GetDefaultPort() const { return nDefaultPort; }
-    const uint256& ProofOfWorkLimit() const { return bnProofOfWorkLimit; }
+    const uint256& PoWLimit() const { return bnProofOfWorkLimit; }
     int SubsidyHalvingInterval() const { return nSubsidyHalvingInterval; }
     /** Used to check majorities for block version upgrade */
     int EnforceBlockUpgradeMajority() const { return nEnforceBlockUpgradeMajority; }
@@ -70,12 +70,20 @@ public:
     bool SkipProofOfWorkCheck() const { return fSkipProofOfWorkCheck; }
     /** Make standard checks */
     bool RequireStandard() const { return fRequireStandard; }
-    int64_t TargetPoWSpacing() const { return nTargetPoWSpacing; }
-    int64_t TargetPoSTimespan() const { return nTargetPoSTimespan; }
-    int64_t TargetPoSSpacing() const { return nTargetPoSSpacing; }
-    int64_t Interval() const { return nTargetPoSTimespan / nTargetPoSSpacing; }
+
+    int64_t PoWTargetSpacing() const { return nTargetPoWSpacing; }
+    int64_t AveragingWindowTimespan() const { return nPoWAveragingWindow * nPoWTargetSpacing; }
+    int64_t MinActualTimespan() const { return (AveragingWindowTimespan() * (100 - nPoWMaxAdjustUp  )) / 100; }
+    int64_t MaxActualTimespan() const { return (AveragingWindowTimespan() * (100 + nPoWMaxAdjustDown)) / 100; }
+    int64_t PowAveragingWindow() const { return nPoWAveragingWindow; }
+
+    int64_t PoSTargetTimespan() const { return nPoSTargetTimespan; }
+    int64_t PoSTargetSpacing() const { return nPoSTargetSpacing; }
+    int64_t Interval() const { return nPoSTargetTimespan / nPoSTargetSpacing; }
+
     int FirstRewardBlock() const { return nFirstRewardBlock; }
     int FirstPoSBlock() const { return nFirstPoSBlock; }
+
     int COINBASE_MATURITY() const { return nMaturity; }
     int ModifierUpgradeBlock() const { return nModifierUpdateBlock; }
     /** The masternode count that we will allow the see-saw reward payments to be off by */
@@ -96,6 +104,7 @@ public:
     int64_t StartMasternodePayments() const { return nStartMasternodePayments; }
     CBaseChainParams::Network NetworkID() const { return networkID; }
 
+
 protected:
     CChainParams() {}
 
@@ -110,9 +119,16 @@ protected:
     int nEnforceBlockUpgradeMajority;
     int nRejectBlockOutdatedMajority;
     int nToCheckBlockUpgradeMajority;
+
     int64_t nTargetPoWSpacing;
-    int64_t nTargetPoSTimespan;
-    int64_t nTargetPoSSpacing;
+    int64_t nPoWTargetSpacing;
+    int64_t nPoWAveragingWindow;
+    int64_t nPoWMaxAdjustDown;
+    int64_t nPoWMaxAdjustUp;
+    
+    int64_t nPoSTargetTimespan;
+    int64_t nPoSTargetSpacing;
+
     int nFirstRewardBlock;
     int nFirstPoSBlock;
     int nMasternodeCountDrift;

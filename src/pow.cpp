@@ -7,6 +7,7 @@
 
 #include "pow.h"
 
+#include "arith_uint256.h"
 #include "chain.h"
 #include "chainparams.h"
 #include "main.h"
@@ -17,6 +18,101 @@
 #include <math.h>
 
 
+//unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
+unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, bool IsProofOfStake)
+{
+    if (IsProofOfStake) {
+        //LogPrintf("GetNextWorkRequired: IsProofOfStake\n");
+        // This is a PoS Block, calculate difficulty differently than PoW block
+        uint256 bnTargetLimit = (~uint256(0) >> 24);
+        int64_t nTargetTimespan = Params().PoSTargetTimespan();
+        int64_t nTargetSpacing = Params().PoSTargetSpacing();
+
+        int64_t nActualSpacing = 0;
+        if (pindexLast->nHeight != 0)
+            nActualSpacing = pindexLast->GetBlockTime() - pindexLast->pprev->GetBlockTime();
+
+        if (nActualSpacing < 0)
+            nActualSpacing = 1;
+
+        // ppcoin: target change every block
+        // ppcoin: retarget with exponential moving toward target spacing
+        uint256 bnNew;
+        bnNew.SetCompact(pindexLast->nBits);
+
+        int64_t nInterval = nTargetTimespan / nTargetSpacing;
+        bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+        bnNew /= ((nInterval + 1) * nTargetSpacing);
+
+        if (bnNew <= 0 || bnNew > bnTargetLimit)
+            bnNew = bnTargetLimit;
+
+        return bnNew.GetCompact();
+    }
+    else
+    {
+        unsigned int nProofOfWorkLimit = Params().PoWLimit().GetCompact();
+
+        // Genesis block
+        if (pindexLast == NULL)
+            return nProofOfWorkLimit;
+
+        // Find the first block in the averaging interval
+        const CBlockIndex* pindexFirst = pindexLast;
+        arith_uint256 bnTot {0};
+        for (int i = 0; pindexFirst && i < Params().PowAveragingWindow(); i++) {
+            arith_uint256 bnTmp;
+            bnTmp.SetCompact(pindexFirst->nBits);
+            bnTot += bnTmp;
+            pindexFirst = pindexFirst->pprev;
+        }
+
+        // Check we have enough blocks
+        if (pindexFirst == NULL)
+            return nProofOfWorkLimit;
+
+        arith_uint256 bnAvg {bnTot / Params().PowAveragingWindow()};
+
+        return CalculateNextWorkRequired(bnAvg, pindexLast->GetMedianTimePast(), pindexFirst->GetMedianTimePast());
+    } 
+}
+
+unsigned int CalculateNextWorkRequired(arith_uint256 bnAvg, int64_t nLastBlockTime, int64_t nFirstBlockTime)
+{
+    // ZenCash: https://github.com/zencashio/zen/blob/master/src/pow.cpp
+    // Limit adjustment step
+    // Use medians to prevent time-warp attacks
+    int64_t nActualTimespan = nLastBlockTime - nFirstBlockTime;
+    LogPrint("pow", "  nActualTimespan = %d  before dampening\n", nActualTimespan);
+    nActualTimespan = Params().AveragingWindowTimespan() + (nActualTimespan - Params().AveragingWindowTimespan())/4;
+    LogPrint("pow", "  nActualTimespan = %d  before bounds\n", nActualTimespan);
+
+    if (nActualTimespan < Params().MinActualTimespan())
+        nActualTimespan = Params().MinActualTimespan();
+    if (nActualTimespan > Params().MaxActualTimespan())
+        nActualTimespan = Params().MaxActualTimespan();
+
+    // Retarget
+    const arith_uint256 bnPowLimit = UintToArith256(Params().PoWLimit());
+    arith_uint256 bnNew {bnAvg};
+    bnNew /= Params().AveragingWindowTimespan();
+    bnNew *= nActualTimespan;
+
+    if (bnNew > bnPowLimit)
+        bnNew = bnPowLimit;
+
+    /// debug print
+    LogPrint("pow", "GetNextWorkRequired RETARGET\n");
+    LogPrint("pow", "Params().AveragingWindowTimespan() = %d    nActualTimespan = %d\n", Params().AveragingWindowTimespan(), nActualTimespan);
+    LogPrint("pow", "Current average: %08x  %s\n", bnAvg.GetCompact(), bnAvg.ToString());
+    LogPrint("pow", "After:  %08x  %s\n", bnNew.GetCompact(), bnNew.ToString());
+
+    return bnNew.GetCompact();
+}
+
+
+
+/*
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, bool IsProofOfStake)
 {
     const CBlockIndex* BlockLastSolved = pindexLast;
@@ -33,8 +129,8 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         //LogPrintf("GetNextWorkRequired: IsProofOfStake\n");
         // This is a PoS Block, calculate difficulty differently than PoW block
         uint256 bnTargetLimit = (~uint256(0) >> 24);
-        int64_t nTargetTimespan = Params().TargetPoSTimespan();
-        int64_t nTargetSpacing = Params().TargetPoSSpacing();
+        int64_t nTargetTimespan = Params().PoSTargetTimespan();
+        int64_t nTargetSpacing = Params().PoSTargetSpacing();
 
         int64_t nActualSpacing = 0;
         if (pindexLast->nHeight != 0)
@@ -107,7 +203,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
         uint256 bnNew(PastDifficultyAverage);
 
-        int64_t _nTargetTimespan = CountBlocks * Params().TargetPoWSpacing();
+        int64_t _nTargetTimespan = CountBlocks * Params().PoWTargetSpacing();
         //LogPrintf("GetNextWorkRequired: _nTargetTimespan = %d, nActualTimespan = %d\n", _nTargetTimespan, nActualTimespan);
 
         if (nActualTimespan < _nTargetTimespan / 3)
@@ -126,6 +222,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         return bnNew.GetCompact();
     }
 }
+*/
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits)
 {
@@ -139,7 +236,7 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits)
     bnTarget.SetCompact(nBits, &fNegative, &fOverflow);
 
     // Check range
-    if (fNegative || bnTarget == 0 || fOverflow || bnTarget > Params().ProofOfWorkLimit())
+    if (fNegative || bnTarget == 0 || fOverflow || bnTarget > Params().PoWLimit())
         return error("CheckProofOfWork() : nBits below minimum work");
 
     // Check proof of work matches claimed amount
