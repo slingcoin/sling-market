@@ -49,11 +49,11 @@ static void convertSeed6(std::vector<CAddress>& vSeedsOut, const SeedSpec6* data
 // + Contains no strange transactions
 static Checkpoints::MapCheckpoints mapCheckpoints =
     boost::assign::map_list_of
-    (0, uint256("0x00006e1a45d8bf5547bd6739ca11979c1adce6be4a503510a0c9abb8d650d510"))
+    (0, uint256("0x000001c0416b896d41bcea146e7f790dfd7f0172b56537f213fb4ad807735c9e"))
     ;
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
-    1503255955,     // * UNIX timestamp of last checkpoint block
+    1504554234,     // * UNIX timestamp of last checkpoint block
     0,              // * total number of transactions between genesis and last checkpoint
                     //   (the tx=... number in the SetBestChain debug.log lines)
     1440            // * estimated number of transactions per day after checkpoint
@@ -143,14 +143,14 @@ public:
         convertSeed6(vFixedSeeds, pnSeed6_main, ARRAYLEN(pnSeed6_main));
 
         fRequireRPCPassword = true;
-        fMiningRequiresPeers = false; //TODO: CryptoDJ, change back to true
+        fMiningRequiresPeers = true; //TODO: CryptoDJ, change back to true
         fAllowMinDifficultyBlocks = true; //TODO: CryptoDJ, change back to false
         fDefaultConsistencyChecks = false;
         fRequireStandard = true;
         fMineBlocksOnDemand = false;
         fSkipProofOfWorkCheck = false;
         fTestnetToBeDeprecatedFieldRPC = false;
-        fHeadersFirstSyncingActive = false;
+        fHeadersFirstSyncingActive = true;
 
         nPoolMaxTransactions = 3;
         strSporkKey = "048216a20abab9c0edb9a813328bbc4dad2082dda77c4b990bccbade46a8a331928c3a165aa4bd8ef1d8e1b9c9660da46dd6371eed67f92ec711d2e0cbfb13b47e";
