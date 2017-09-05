@@ -538,11 +538,13 @@ void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
                 // on an obsolete chain. In regtest mode we expect to fly solo.
                 do {
                     bool fvNodesEmpty;
+                    bool fvIsInitialBlockDownload;
                     {
                         LOCK(cs_vNodes);
                         fvNodesEmpty = vNodes.empty();
                     }
-                    if (!fvNodesEmpty && !IsInitialBlockDownload() && masternodeSync.IsSynced())
+                    fvIsInitialBlockDownload = IsInitialBlockDownload();
+                    if (!fvNodesEmpty && !fvIsInitialBlockDownload /*&& masternodeSync.IsSynced()*/)
                         break;
                     MilliSleep(1000);
                 } while (true);

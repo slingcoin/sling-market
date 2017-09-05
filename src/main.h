@@ -120,6 +120,7 @@ static const CAmount STATIC_MASTERNODE_COLLATERAL_AMOUNT = 735 * COIN;
 static const CAmount STATIC_MASTERNODE_BUDGET_AMOUNT = 1009 * COIN;
 static const unsigned int MINIMUM_STAKE_AGE = 60 * 60; //TODO: CryptoDJ, increase to 1 day (24 * 60 * 60).  Current min coin age set to 1 hour.
 
+static const int64_t DEFAULT_MAX_TIP_AGE = 24 * 60 * 60 * 3; //TODO: CryptoDJ, change back to 1 day or 24 * 60 * 60
 
 struct BlockHasher {
     size_t operator()(const uint256& hash) const { return hash.GetLow64(); }
