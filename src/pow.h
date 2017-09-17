@@ -8,21 +8,33 @@
 
 #include <stdint.h>
 
+class arith_uint256;
+class uint256;
 class CBlockHeader;
 class CBlockIndex;
-class uint256;
-class arith_uint256;
 
-// Define difficulty retarget algorithms
-enum DiffMode {
-    DIFF_DEFAULT = 0, // Default to invalid 0
-    DIFF_BTC = 1,     // Retarget every x blocks (Bitcoin style)
-    DIFF_KGW = 2,     // Retarget using Kimoto Gravity Well
-    DIFF_DGW = 3,     // Retarget using Dark Gravity Wave v3
-};
+#define PERCENT_FACTOR 100
+
+#define BLOCK_TYPE CBlockHeader *
+#define BLOCK_TIME(block) block->nTime
+#define INDEX_TYPE CBlockIndex *
+#define INDEX_HEIGHT(block) block->nHeight
+#define INDEX_TIME(block) block->GetBlockTime()
+#define INDEX_PREV(block) block->pprev
+#define INDEX_TARGET(block) block->nBits
+#define DIFF_SWITCHOVER(TEST, MAIN) (GetBoolArg("-testnet", false) ? TEST : MAIN)
+#define DIFF_ABS std::abs
+#define SET_COMPACT(EXPANDED, COMPACT) EXPANDED.SetCompact(COMPACT)
+#define GET_COMPACT(EXPANDED) EXPANDED.GetCompact()
+#define BIGINT_MULTIPLY(x, y) x* y
+#define BIGINT_DIVIDE(x, y) x / y
+#define BIGINT_GREATER_THAN(x, y) (x > y)
 
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, bool IsProofOfStake = false);
-unsigned int CalculateNextWorkRequired(arith_uint256 bnAvg, int64_t nLastBlockTime, int64_t nFirstBlockTime);
+unsigned int PoSDifficultyAdjumentAlgorithm(const CBlockIndex* pindexLast);
+unsigned int ZenDifficultyAdjumentAlgorithm(const CBlockIndex* pindexLast);
+unsigned int DeltaDifficultyAdjumentAlgorithm(const INDEX_TYPE pindexLast, const BLOCK_TYPE block);
+unsigned int DGW3DifficultyAdjumentAlgorithm(const CBlockIndex* pindexLast, const CBlockHeader* pblock);
 
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
 bool CheckProofOfWork(uint256 hash, unsigned int nBits);
