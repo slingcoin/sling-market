@@ -103,10 +103,9 @@ public:
 
         nMinerThreads = 0;
         // PoW
-        nPoWAveragingWindow = 17;
-        //assert(maxUint/bnProofOfWorkLimit >= nPowAveragingWindow);
-        nPoWMaxAdjustDown = 32; // 32% adjustment down
-        nPoWMaxAdjustUp = 16; // 16% adjustment up
+        nPoWAveragingWindow = 5; // updated from 17 to 5 after testing by coin-info-net@github.com
+        nPoWMaxAdjustDown = 48; // updated from 32% to 48% after testing by coin-info-net@github.com
+        nPoWMaxAdjustUp = 32; // // updated from 16% to 32% after testing by coin-info-net@github.com
         nPoWTargetSpacing = 2.5 * 60; // Sling: 2.5 minutes //TODO: CryptoDJ, increase to 7 minutes
 
         nPoSTargetTimespan = 67 * 40;  // Sling: not sure?
